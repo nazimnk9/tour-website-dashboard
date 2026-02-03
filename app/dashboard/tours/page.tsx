@@ -1,0 +1,182 @@
+'use client'
+
+import { useState, useMemo } from 'react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Search, Plus, Clock, DollarSign } from 'lucide-react'
+import { mockTours } from '@/app/lib/mock-data'
+
+const ITEMS_PER_PAGE = 6
+
+export default function ToursPage() {
+  const [searchTerm, setSearchTerm] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const filteredTours = useMemo(() => {
+    return mockTours.filter((tour) =>
+      tour.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tour.description.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  }, [searchTerm])
+
+  const totalPages = Math.ceil(filteredTours.length / ITEMS_PER_PAGE)
+  const paginatedTours = filteredTours.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  )
+
+  return (
+    <div className="space-y-6 sm:space-y-8 pb-8">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+        <div className="flex-1">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">Tours</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Manage and organize all your tour offerings</p>
+        </div>
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 whitespace-nowrap text-sm sm:text-base px-4 py-2 h-10 sm:h-11 rounded-lg">
+          <Plus size={20} />
+          Add New Tours
+        </Button>
+      </div>
+
+      {/* Search Bar */}
+      <Card className="p-4 sm:p-6 border-border shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
+            <Input
+              placeholder="Search tours by name or description..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value)
+                setCurrentPage(1)
+              }}
+              className="pl-10 h-10 sm:h-11 border-border text-sm"
+            />
+          </div>
+          <Button variant="outline" className="border-border bg-transparent text-sm sm:text-base h-10 sm:h-11 hover:bg-secondary">
+            Search
+          </Button>
+        </div>
+      </Card>
+
+      {/* Tours Grid - Fully responsive */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 auto-rows-fr">
+        {paginatedTours.map((tour) => (
+          <Card
+            key={tour.id}
+            className="overflow-hidden border-border hover:shadow-lg transition-all duration-300 flex flex-col group"
+          >
+            {/* Tour Image */}
+            <div className="relative h-40 sm:h-48 bg-secondary overflow-hidden">
+              <img
+                src={tour.image || "/placeholder.svg"}
+                alt={tour.name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <Badge className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-primary text-primary-foreground text-xs sm:text-sm px-2 sm:px-3 py-1 rounded">
+                ${tour.price}
+              </Badge>
+            </div>
+
+            {/* Tour Info */}
+            <div className="p-4 sm:p-5 flex-1 flex flex-col">
+              <h3 className="text-base sm:text-lg font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                {tour.name}
+              </h3>
+              <p className="text-muted-foreground text-xs sm:text-sm mb-4 line-clamp-3 flex-1">
+                {tour.description}
+              </p>
+
+              {/* Duration */}
+              <div className="flex items-center gap-2 text-muted-foreground text-xs sm:text-sm mb-4">
+                <Clock size={16} className="flex-shrink-0" />
+                <span className="font-medium">{tour.duration}</span>
+              </div>
+
+              {/* Locations Badge */}
+              <div className="mb-4 flex flex-wrap gap-2">
+                {tour.locations.slice(0, 2).map((location) => (
+                  <Badge key={location.id} variant="secondary" className="text-xs sm:text-sm px-2 py-1">
+                    {location.name}
+                  </Badge>
+                ))}
+                {tour.locations.length > 2 && (
+                  <Badge variant="secondary" className="text-xs sm:text-sm px-2 py-1">
+                    +{tour.locations.length - 2} more
+                  </Badge>
+                )}
+              </div>
+
+              {/* View Details Button */}
+              <Link href={`/dashboard/tours/${tour.id}`} className="w-full">
+                <Button
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 text-sm h-10 rounded-lg font-semibold"
+                >
+                  View Details
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 overflow-x-auto pb-4">
+          <Button
+            variant="outline"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            className="border-border text-sm h-10 px-4 flex-shrink-0"
+          >
+            Previous
+          </Button>
+
+          <div className="flex gap-1 flex-shrink-0">
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <Button
+                key={i + 1}
+                variant={currentPage === i + 1 ? 'default' : 'outline'}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`text-sm h-10 w-10 p-0 rounded-lg ${
+                  currentPage === i + 1
+                    ? 'bg-primary text-primary-foreground'
+                    : 'border-border hover:bg-secondary'
+                }`}
+              >
+                {i + 1}
+              </Button>
+            ))}
+          </div>
+
+          <Button
+            variant="outline"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            className="border-border text-sm h-10 px-4 flex-shrink-0"
+          >
+            Next
+          </Button>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {paginatedTours.length === 0 && (
+        <Card className="p-8 sm:p-12 border-border text-center bg-secondary/30">
+          <p className="text-muted-foreground mb-6 text-sm sm:text-base font-medium">No tours found matching your search.</p>
+          <Button
+            variant="outline"
+            className="border-border bg-primary text-primary-foreground hover:bg-primary/90 text-sm h-10 px-6 rounded-lg"
+            onClick={() => setSearchTerm('')}
+          >
+            Clear Search
+          </Button>
+        </Card>
+      )}
+    </div>
+  )
+}
