@@ -51,10 +51,10 @@ export function Topbar({
 
           {isDesktop && !isMobile && (
             <Button
-              variant="ghost"
+              variant="default"
               size="icon"
               onClick={onToggleSidebarCollapse}
-              className="text-foreground hover:bg-secondary flex-shrink-0 hidden md:flex"
+              className="text-foreground hover:bg-primary/50 flex-shrink-0 hidden md:flex"
               aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               {isSidebarCollapsed ? <PanelLeftOpen size={24} /> : <PanelLeftClose size={24} />}
