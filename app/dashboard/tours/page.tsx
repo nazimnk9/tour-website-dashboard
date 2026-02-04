@@ -1,32 +1,75 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Search, Plus, Clock, DollarSign } from 'lucide-react'
-import { mockTours } from '@/app/lib/mock-data'
+import { Search, Plus, Clock, Loader2, AlertCircle } from 'lucide-react'
+import { getTourPlans, TourPlan } from '@/app/lib/api'
+import { getCookie } from '@/app/lib/cookies'
 
 const ITEMS_PER_PAGE = 6
 
 export default function ToursPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [tours, setTours] = useState<TourPlan[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchTours = async () => {
+      try {
+        setIsLoading(true)
+        const token = getCookie('access_token')
+        if (token) {
+          const response = await getTourPlans(token)
+          setTours(response.results)
+        } else {
+          setError('Authentication token not found. Please log in again.')
+        }
+      } catch (err) {
+        setError('Failed to fetch tours. Please try again later.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchTours()
+  }, [])
 
   const filteredTours = useMemo(() => {
-    return mockTours.filter((tour) =>
-      tour.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    return tours.filter((tour) =>
+      tour.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tour.description.toLowerCase().includes(searchTerm.toLowerCase())
     )
-  }, [searchTerm])
+  }, [searchTerm, tours])
 
   const totalPages = Math.ceil(filteredTours.length / ITEMS_PER_PAGE)
   const paginatedTours = filteredTours.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   )
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-4">
+        <AlertCircle className="h-12 w-12 text-destructive" />
+        <p className="text-lg font-medium text-foreground">{error}</p>
+        <Button onClick={() => window.location.reload()}>Retry</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 sm:space-y-8 pb-8">
@@ -48,7 +91,7 @@ export default function ToursPage() {
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
             <Input
-              placeholder="Search tours by name or description..."
+              placeholder="Search tours by title or description..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value)
@@ -73,29 +116,31 @@ export default function ToursPage() {
             {/* Tour Image */}
             <div className="relative h-40 sm:h-48 bg-secondary overflow-hidden">
               <img
-                src={tour.image || "/placeholder.svg"}
-                alt={tour.name}
+                src={tour.images[0]?.file || "/placeholder.svg"}
+                alt={tour.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <Badge className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-primary text-primary-foreground text-xs sm:text-sm px-2 sm:px-3 py-1 rounded">
-                ${tour.price}
+                ${tour.price_adult}
               </Badge>
             </div>
 
             {/* Tour Info */}
             <div className="p-4 sm:p-5 flex-1 flex flex-col">
               <h3 className="text-base sm:text-lg font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                {tour.name}
+                {tour.title}
               </h3>
               <p className="text-muted-foreground text-xs sm:text-sm mb-4 line-clamp-3 flex-1">
                 {tour.description}
               </p>
 
               {/* Duration */}
-              <div className="flex items-center gap-2 text-muted-foreground text-xs sm:text-sm mb-4">
-                <Clock size={16} className="flex-shrink-0" />
-                <span className="font-medium">{tour.duration}</span>
-              </div>
+              {tour.duration_days && (
+                <div className="flex items-center gap-2 text-muted-foreground text-xs sm:text-sm mb-4">
+                  <Clock size={16} className="flex-shrink-0" />
+                  <span className="font-medium">{tour.duration_days} Days</span>
+                </div>
+              )}
 
               {/* Locations Badge */}
               <div className="mb-4 flex flex-wrap gap-2">
@@ -114,7 +159,7 @@ export default function ToursPage() {
               {/* View Details Button */}
               <Link href={`/dashboard/tours/${tour.id}`} className="w-full">
                 <Button
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 text-sm h-10 rounded-lg font-semibold"
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 text-sm h-10 rounded-lg font-semibold cursor-pointer"
                 >
                   View Details
                 </Button>
@@ -142,11 +187,10 @@ export default function ToursPage() {
                 key={i + 1}
                 variant={currentPage === i + 1 ? 'default' : 'outline'}
                 onClick={() => setCurrentPage(i + 1)}
-                className={`text-sm h-10 w-10 p-0 rounded-lg ${
-                  currentPage === i + 1
+                className={`text-sm h-10 w-10 p-0 rounded-lg ${currentPage === i + 1
                     ? 'bg-primary text-primary-foreground'
                     : 'border-border hover:bg-secondary'
-                }`}
+                  }`}
               >
                 {i + 1}
               </Button>
@@ -165,7 +209,7 @@ export default function ToursPage() {
       )}
 
       {/* Empty State */}
-      {paginatedTours.length === 0 && (
+      {paginatedTours.length === 0 && !isLoading && !error && (
         <Card className="p-8 sm:p-12 border-border text-center bg-secondary/30">
           <p className="text-muted-foreground mb-6 text-sm sm:text-base font-medium">No tours found matching your search.</p>
           <Button
