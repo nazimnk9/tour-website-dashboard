@@ -143,3 +143,27 @@ export const getTourPlanDetail = async (token: string, id: string): Promise<Tour
 
     return responseData as TourPlan;
 };
+/**
+ * Create a new tour plan
+ * @param token Authentication token
+ * @param data Tour plan data
+ * @returns Created tour plan
+ */
+export const createTourPlan = async (token: string, data: Partial<TourPlan>): Promise<TourPlan> => {
+    const response = await fetch(`${API_BASE_URL}/tour/plan/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as TourPlan;
+};

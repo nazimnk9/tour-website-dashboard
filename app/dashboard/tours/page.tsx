@@ -79,10 +79,12 @@ export default function ToursPage() {
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">Tours</h1>
           <p className="text-muted-foreground text-sm sm:text-base">Manage and organize all your tour offerings</p>
         </div>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 whitespace-nowrap text-sm sm:text-base px-4 py-2 h-10 sm:h-11 rounded-lg">
-          <Plus size={20} />
-          Add New Tours
-        </Button>
+        <Link href="/dashboard/tours/create">
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 whitespace-nowrap text-sm sm:text-base px-4 py-2 h-10 sm:h-11 rounded-lg">
+            <Plus size={20} />
+            Add New Tours
+          </Button>
+        </Link>
       </div>
 
       {/* Search Bar */}
@@ -188,8 +190,8 @@ export default function ToursPage() {
                 variant={currentPage === i + 1 ? 'default' : 'outline'}
                 onClick={() => setCurrentPage(i + 1)}
                 className={`text-sm h-10 w-10 p-0 rounded-lg ${currentPage === i + 1
-                    ? 'bg-primary text-primary-foreground'
-                    : 'border-border hover:bg-secondary'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'border-border hover:bg-secondary'
                   }`}
               >
                 {i + 1}

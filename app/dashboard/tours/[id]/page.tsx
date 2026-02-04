@@ -133,24 +133,6 @@ export default function TourDetailsPage() {
                 ))}
               </div>
             </div>
-
-            {/* Actions */}
-            <div className="p-4 border-t border-border flex gap-2">
-              <Button
-                variant="outline"
-                className="flex-1 border-border text-primary hover:bg-primary/10 bg-transparent h-10"
-              >
-                <Edit size={18} />
-                Edit
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1 border-border text-destructive hover:bg-destructive/10 bg-transparent h-10"
-              >
-                <Trash2 size={18} />
-                Delete
-              </Button>
-            </div>
           </Card>
 
           {/* Price & Duration Card */}
@@ -174,8 +156,30 @@ export default function TourDetailsPage() {
                   Free Cancellation
                 </Badge>
               )}
+              {tour.pickup_included && (
+                <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
+                  Pickup Included
+                </Badge>
+              )}
             </div>
           </Card>
+          {/* Actions */}
+          <div className="p-4 border-t border-border flex gap-2">
+            <Button
+              variant="outline"
+              className="flex-1 border-border text-primary hover:bg-primary/10 bg-transparent h-10"
+            >
+              <Edit size={18} />
+              Edit
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 border-border text-destructive hover:bg-destructive/10 bg-transparent h-10"
+            >
+              <Trash2 size={18} />
+              Delete
+            </Button>
+          </div>
         </div>
 
         {/* Right Column - Comprehensive Content */}
@@ -185,7 +189,7 @@ export default function TourDetailsPage() {
             <h2 className="text-2xl font-bold text-foreground">Overview</h2>
 
             {tour.full_description && (
-              <div className="prose prose-sm max-w-none text-muted-foreground">
+              <div className="prose prose-sm max-w-none text-muted-foreground wrap-break-word">
                 <p className="whitespace-pre-line">{tour.full_description}</p>
               </div>
             )}
@@ -309,7 +313,7 @@ export default function TourDetailsPage() {
                         <li key={i} className="text-sm text-muted-foreground pb-2 border-b border-border/50 last:border-0 flex items-start gap-2">
                           <span className="text-destructive flex-shrink-0">{i + 1}.</span>
                           {item}
-                          </li>
+                        </li>
                       ))}
                     </ul>
                   ) : (
