@@ -119,3 +119,27 @@ export const getTourPlans = async (token: string): Promise<TourPlanResponse> => 
 
     return responseData as TourPlanResponse;
 };
+
+/**
+ * Get a single tour plan detail
+ * @param token Authentication token
+ * @param id Tour plan ID
+ * @returns Tour plan detail
+ */
+export const getTourPlanDetail = async (token: string, id: string): Promise<TourPlan> => {
+    const response = await fetch(`${API_BASE_URL}/tour/plan/${id}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as TourPlan;
+};
