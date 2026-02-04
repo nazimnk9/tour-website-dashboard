@@ -151,7 +151,7 @@ export function LocationModal({
               />
             </div>
 
-            <div className="flex gap-2 pt-2">
+            {/* <div className="flex gap-2 pt-2">
               <Button
                 onClick={handleAddLocation}
                 className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
@@ -171,7 +171,7 @@ export function LocationModal({
                   Cancel
                 </Button>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -188,7 +188,7 @@ export function LocationModal({
             onClick={handleSave}
             className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            Save Changes
+            {editingId ? 'Update Location' : 'Add Location'}
           </Button>
         </div>
       </DialogContent>

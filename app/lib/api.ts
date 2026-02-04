@@ -64,6 +64,7 @@ export interface TourPlan {
     status: string;
     is_active: boolean;
     image_ids?: number[];
+    location_ids?: number[];
     created_at: string;
     updated_at: string;
 }
@@ -202,6 +203,76 @@ export const uploadTourImage = async (token: string, file: File): Promise<TourIm
  */
 export const deleteTourImage = async (token: string, id: number): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/tour/image/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const responseData = await response.json().catch(() => ({}));
+        throw responseData;
+    }
+};
+
+/**
+ * Create a new tour location
+ * @param token Authentication token
+ * @param data Location data (name, description)
+ * @returns Created location details
+ */
+export const createTourLocation = async (token: string, data: { name: string, description: string }): Promise<TourLocation> => {
+    const response = await fetch(`${API_BASE_URL}/tour/location/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as TourLocation;
+};
+
+/**
+ * Update a tour location
+ * @param token Authentication token
+ * @param id Location ID to update
+ * @param data Updated location data
+ * @returns Updated location details
+ */
+export const updateTourLocation = async (token: string, id: number, data: { name: string, description: string }): Promise<TourLocation> => {
+    const response = await fetch(`${API_BASE_URL}/tour/location/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as TourLocation;
+};
+
+/**
+ * Delete a tour location
+ * @param token Authentication token
+ * @param id Location ID to delete
+ */
+export const deleteTourLocation = async (token: string, id: number): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/tour/location/${id}`, {
         method: 'DELETE',
         headers: {
             'Authorization': `Bearer ${token}`,

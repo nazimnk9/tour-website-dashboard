@@ -213,7 +213,7 @@ export default function TourDetailsPage() {
           <Card className="p-6 border-border shadow-md">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold text-foreground">Locations</h2>
-              <Button
+              {/* <Button
                 size="sm"
                 className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
                 onClick={() => {
@@ -223,7 +223,7 @@ export default function TourDetailsPage() {
               >
                 <Plus size={16} />
                 Add New Location
-              </Button>
+              </Button> */}
             </div>
 
             {tour.locations.length > 0 ? (
@@ -252,7 +252,7 @@ export default function TourDetailsPage() {
               </p>
             )}
 
-            <Button
+            {/* <Button
               variant="outline"
               className="w-full border-border text-primary hover:bg-primary/10 bg-transparent"
               onClick={() => {
@@ -261,7 +261,7 @@ export default function TourDetailsPage() {
               }}
             >
               Edit Locations
-            </Button>
+            </Button> */}
           </Card>
 
           {/* Inclusions & Exclusions */}

@@ -15,7 +15,9 @@ import {
     Loader2,
     AlertCircle,
     ImagePlus,
-    X
+    X,
+    MapPin,
+    Edit2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -40,9 +42,10 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { createTourPlan, ApiErrorResponse, uploadTourImage, deleteTourImage, TourImage } from '@/app/lib/api'
+import { createTourPlan, ApiErrorResponse, uploadTourImage, deleteTourImage, TourImage, TourLocation, createTourLocation, updateTourLocation, deleteTourLocation } from '@/app/lib/api'
 import { getCookie } from '@/app/lib/cookies'
 import { useEffect } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 
 export default function CreateTourPage() {
     const router = useRouter()
@@ -59,6 +62,14 @@ export default function CreateTourPage() {
     const [isUploading, setIsUploading] = useState(false)
     const [deletingImageId, setDeletingImageId] = useState<number | null>(null)
 
+    // Location State
+    const [uploadedLocations, setUploadedLocations] = useState<TourLocation[]>([])
+    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
+    const [isProcessingLocation, setIsProcessingLocation] = useState(false)
+    const [deletingLocationId, setDeletingLocationId] = useState<number | null>(null)
+    const [editingLocation, setEditingLocation] = useState<TourLocation | null>(null)
+    const [locationForm, setLocationForm] = useState({ name: '', description: '' })
+
     // Sync with local storage on mount
     useEffect(() => {
         const savedImages = localStorage.getItem('tour_uploaded_images')
@@ -69,10 +80,23 @@ export default function CreateTourPage() {
                 console.error("Failed to parse saved images", e)
             }
         }
+
+        const savedLocations = localStorage.getItem('tour_uploaded_locations')
+        if (savedLocations) {
+            try {
+                setUploadedLocations(JSON.parse(savedLocations))
+            } catch (e) {
+                console.error("Failed to parse saved locations", e)
+            }
+        }
     }, [])
 
     const updateLocalStorage = (images: TourImage[]) => {
         localStorage.setItem('tour_uploaded_images', JSON.stringify(images))
+    }
+
+    const updateLocationLocalStorage = (locations: TourLocation[]) => {
+        localStorage.setItem('tour_uploaded_locations', JSON.stringify(locations))
     }
 
     // Form State
@@ -163,11 +187,13 @@ export default function CreateTourPage() {
                 not_suitable_for: notSuitableFor,
                 not_allowed: notAllowed,
                 know_before_you_go: knowBeforeYouGo,
-                image_ids: uploadedImages.map(img => img.id)
+                image_ids: uploadedImages.map(img => img.id),
+                location_ids: uploadedLocations.map(loc => loc.id)
             }
 
             await createTourPlan(token, payload)
             localStorage.removeItem('tour_uploaded_images')
+            localStorage.removeItem('tour_uploaded_locations')
             setSuccessDialogOpen(true)
         } catch (err: any) {
             console.error('Create tour error:', err)
@@ -311,6 +337,66 @@ export default function CreateTourPage() {
         }
     }
 
+    const handleLocationSave = async () => {
+        if (!locationForm.name.trim()) return
+
+        const token = getCookie('access_token')
+        if (!token) return
+
+        setIsProcessingLocation(true)
+        try {
+            if (editingLocation) {
+                const updated = await updateTourLocation(token, editingLocation.id, locationForm)
+                const newLocations = uploadedLocations.map(loc => loc.id === updated.id ? updated : loc)
+                setUploadedLocations(newLocations)
+                updateLocationLocalStorage(newLocations)
+            } else {
+                const created = await createTourLocation(token, locationForm)
+                const newLocations = [...uploadedLocations, created]
+                setUploadedLocations(newLocations)
+                updateLocationLocalStorage(newLocations)
+            }
+            setIsLocationModalOpen(false)
+            setEditingLocation(null)
+            setLocationForm({ name: '', description: '' })
+        } catch (err: any) {
+            setErrorDialog({
+                isOpen: true,
+                title: 'Location Error',
+                message: err.name ? `Name: ${err.name[0]}` : 'Failed to save location.'
+            })
+        } finally {
+            setIsProcessingLocation(false)
+        }
+    }
+
+    const handleLocationDelete = async (id: number) => {
+        const token = getCookie('access_token')
+        if (!token) return
+
+        setDeletingLocationId(id)
+        try {
+            await deleteTourLocation(token, id)
+            const filteredLocations = uploadedLocations.filter(loc => loc.id !== id)
+            setUploadedLocations(filteredLocations)
+            updateLocationLocalStorage(filteredLocations)
+        } catch (err: any) {
+            setErrorDialog({
+                isOpen: true,
+                title: 'Delete Error',
+                message: 'Failed to delete location from the server.'
+            })
+        } finally {
+            setDeletingLocationId(null)
+        }
+    }
+
+    const openEditLocation = (loc: TourLocation) => {
+        setEditingLocation(loc)
+        setLocationForm({ name: loc.name, description: loc.description })
+        setIsLocationModalOpen(true)
+    }
+
     return (
         <div className="space-y-8 pb-12 animate-in fade-in duration-500">
             {/* Header */}
@@ -437,7 +523,123 @@ export default function CreateTourPage() {
                                 </div>
                             )}
                         </div>
+
+                        {/* Location Section */}
+                        <div className="space-y-4 pt-6 border-t border-border">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-lg font-bold flex items-center gap-2">
+                                    <MapPin className="text-primary" size={20} />
+                                    Tour Locations
+                                </Label>
+                                <Button
+                                    type="button"
+                                    onClick={() => {
+                                        setEditingLocation(null)
+                                        setLocationForm({ name: '', description: '' })
+                                        setIsLocationModalOpen(true)
+                                    }}
+                                    className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-8"
+                                >
+                                    <Plus className="mr-1" size={14} />
+                                    Add Location
+                                </Button>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-3">
+                                {uploadedLocations.length > 0 ? (
+                                    uploadedLocations.map((loc) => (
+                                        <Card key={loc.id} className="flex items-center justify-between p-3 bg-secondary/50 border-border group">
+                                            <div className="flex-1">
+                                                <Badge className="mb-1 bg-primary/20 text-primary hover:bg-primary/30 border-none">{loc.name}</Badge>
+                                                <p className="text-xs text-muted-foreground line-clamp-1">{loc.description}</p>
+                                            </div>
+                                            <div className="flex items-center gap-2 ml-4">
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => openEditLocation(loc)}
+                                                    className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
+                                                >
+                                                    <Edit2 size={14} />
+                                                </Button>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    disabled={deletingLocationId === loc.id}
+                                                    onClick={() => handleLocationDelete(loc.id)}
+                                                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                >
+                                                    {deletingLocationId === loc.id ? (
+                                                        <Loader2 size={14} className="animate-spin" />
+                                                    ) : (
+                                                        <X size={14} />
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        </Card>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-6 border-2 border-dashed border-border rounded-lg bg-card/20 text-muted-foreground text-sm">
+                                        No locations added yet. Click "Add Location" to start.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </Card>
+
+                    {/* Location Modal */}
+                    <Dialog open={isLocationModalOpen} onOpenChange={setIsLocationModalOpen}>
+                        <DialogContent className="max-w-md border-primary/20 bg-background/95 backdrop-blur-lg">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2 text-primary font-bold">
+                                    <MapPin size={20} />
+                                    {editingLocation ? 'Update Location' : 'Add New Location'}
+                                </DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="loc-name">Location Name</Label>
+                                    <Input
+                                        id="loc-name"
+                                        placeholder="e.g. History Museum"
+                                        value={locationForm.name}
+                                        onChange={e => setLocationForm({ ...locationForm, name: e.target.value })}
+                                        className="border-border bg-background"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="loc-desc">Description</Label>
+                                    <Textarea
+                                        id="loc-desc"
+                                        placeholder="Short details about this location..."
+                                        value={locationForm.description}
+                                        onChange={e => setLocationForm({ ...locationForm, description: e.target.value })}
+                                        className="border-border bg-background min-h-[100px]"
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setIsLocationModalOpen(false)}
+                                    className="border-border hover:bg-secondary"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="button"
+                                    onClick={handleLocationSave}
+                                    disabled={isProcessingLocation || !locationForm.name.trim()}
+                                    className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[100px]"
+                                >
+                                    {isProcessingLocation ? <Loader2 size={16} className="animate-spin" /> : (editingLocation ? 'Update' : 'Add Location')}
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
 
                     {/* Pricing Sections */}
                     <div className="space-y-6">
