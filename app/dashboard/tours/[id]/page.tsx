@@ -101,11 +101,11 @@ export default function TourDetailsPage() {
         <div className="lg:col-span-1 space-y-6">
           {/* Image Carousel */}
           <Card className="border-border overflow-hidden shadow-md">
-            <div className="relative bg-secondary h-64 sm:h-72">
+            <div className="relative bg-secondary h-76 sm:h-100">
               <img
                 src={tour.images[currentImageIndex]?.file || "/placeholder.svg"}
                 alt={tour.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-fixed"
               />
               {tour.images.length > 1 && (
                 <>

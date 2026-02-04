@@ -13,7 +13,9 @@ import {
     XSquare,
     History,
     Loader2,
-    AlertCircle
+    AlertCircle,
+    ImagePlus,
+    X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -38,8 +40,9 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { createTourPlan, ApiErrorResponse } from '@/app/lib/api'
+import { createTourPlan, ApiErrorResponse, uploadTourImage, deleteTourImage, TourImage } from '@/app/lib/api'
 import { getCookie } from '@/app/lib/cookies'
+import { useEffect } from 'react'
 
 export default function CreateTourPage() {
     const router = useRouter()
@@ -51,34 +54,55 @@ export default function CreateTourPage() {
     })
     const [successDialogOpen, setSuccessDialogOpen] = useState(false)
 
+    // Image Upload State
+    const [uploadedImages, setUploadedImages] = useState<TourImage[]>([])
+    const [isUploading, setIsUploading] = useState(false)
+    const [deletingImageId, setDeletingImageId] = useState<number | null>(null)
+
+    // Sync with local storage on mount
+    useEffect(() => {
+        const savedImages = localStorage.getItem('tour_uploaded_images')
+        if (savedImages) {
+            try {
+                setUploadedImages(JSON.parse(savedImages))
+            } catch (e) {
+                console.error("Failed to parse saved images", e)
+            }
+        }
+    }, [])
+
+    const updateLocalStorage = (images: TourImage[]) => {
+        localStorage.setItem('tour_uploaded_images', JSON.stringify(images))
+    }
+
     // Form State
     const [formData, setFormData] = useState({
         title: '',
         description: '',
         full_description: '',
-        max_adults: 1,
-        price_adult: '0.00',
-        adult_age_min: 18,
-        adult_age_max: 99,
-        max_children: 0,
-        price_child: '0.00',
-        child_age_min: 3,
-        child_age_max: 12,
-        max_infants: 0,
-        price_infant: '0.00',
-        infant_age_min: 0,
-        infant_age_max: 2,
-        max_youth: 0,
-        price_youth: '0.00',
-        youth_age_min: 13,
-        youth_age_max: 17,
-        max_student_eu: 0,
-        price_student_eu: '0.00',
-        student_eu_age_min: 18,
-        student_eu_age_max: 26,
+        max_adults: '' as any,
+        price_adult: '',
+        adult_age_min: '' as any,
+        adult_age_max: '' as any,
+        max_children: '' as any,
+        price_child: '',
+        child_age_min: '' as any,
+        child_age_max: '' as any,
+        max_infants: '' as any,
+        price_infant: '',
+        infant_age_min: '' as any,
+        infant_age_max: '' as any,
+        max_youth: '' as any,
+        price_youth: '',
+        youth_age_min: '' as any,
+        youth_age_max: '' as any,
+        max_student_eu: '' as any,
+        price_student_eu: '',
+        student_eu_age_min: '' as any,
+        student_eu_age_max: '' as any,
         free_cancellation: true,
         pickup_included: false,
-        duration_days: 1,
+        duration_days: '' as any,
         //status: 'Draft',
         is_active: true,
     })
@@ -113,17 +137,37 @@ export default function CreateTourPage() {
                 throw new Error('No authentication token found.')
             }
 
+            const parseNumber = (val: any) => (val === '' || val === null || val === undefined) ? 0 : Number(val)
+
             const payload = {
                 ...formData,
+                max_adults: parseNumber(formData.max_adults),
+                adult_age_min: parseNumber(formData.adult_age_min),
+                adult_age_max: parseNumber(formData.adult_age_max),
+                max_children: parseNumber(formData.max_children),
+                child_age_min: parseNumber(formData.child_age_min),
+                child_age_max: parseNumber(formData.child_age_max),
+                max_infants: parseNumber(formData.max_infants),
+                infant_age_min: parseNumber(formData.infant_age_min),
+                infant_age_max: parseNumber(formData.infant_age_max),
+                max_youth: parseNumber(formData.max_youth),
+                youth_age_min: parseNumber(formData.youth_age_min),
+                youth_age_max: parseNumber(formData.youth_age_max),
+                max_student_eu: parseNumber(formData.max_student_eu),
+                student_eu_age_min: parseNumber(formData.student_eu_age_min),
+                student_eu_age_max: parseNumber(formData.student_eu_age_max),
+                duration_days: parseNumber(formData.duration_days),
                 highlights,
                 includes,
                 excludes,
                 not_suitable_for: notSuitableFor,
                 not_allowed: notAllowed,
                 know_before_you_go: knowBeforeYouGo,
+                image_ids: uploadedImages.map(img => img.id)
             }
 
             await createTourPlan(token, payload)
+            localStorage.removeItem('tour_uploaded_images')
             setSuccessDialogOpen(true)
         } catch (err: any) {
             console.error('Create tour error:', err)
@@ -209,6 +253,64 @@ export default function CreateTourPage() {
         )
     }
 
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files
+        if (!files || files.length === 0) return
+
+        const token = getCookie('access_token')
+        if (!token) {
+            setErrorDialog({
+                isOpen: true,
+                title: 'Authentication Error',
+                message: 'No authentication token found. Please log in again.'
+            })
+            return
+        }
+
+        setIsUploading(true)
+        const newUploadedImages = [...uploadedImages]
+
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const img = await uploadTourImage(token, files[i])
+                newUploadedImages.push(img)
+            }
+            setUploadedImages(newUploadedImages)
+            updateLocalStorage(newUploadedImages)
+        } catch (err: any) {
+            setErrorDialog({
+                isOpen: true,
+                title: 'Upload Error',
+                message: err.detail || 'Failed to upload one or more images.'
+            })
+        } finally {
+            setIsUploading(false)
+            // Clear input
+            e.target.value = ''
+        }
+    }
+
+    const handleImageDelete = async (id: number) => {
+        const token = getCookie('access_token')
+        if (!token) return
+
+        setDeletingImageId(id)
+        try {
+            await deleteTourImage(token, id)
+            const filteredImages = uploadedImages.filter(img => img.id !== id)
+            setUploadedImages(filteredImages)
+            updateLocalStorage(filteredImages)
+        } catch (err: any) {
+            setErrorDialog({
+                isOpen: true,
+                title: 'Delete Error',
+                message: 'Failed to delete image from the server.'
+            })
+        } finally {
+            setDeletingImageId(null)
+        }
+    }
+
     return (
         <div className="space-y-8 pb-12 animate-in fade-in duration-500">
             {/* Header */}
@@ -271,6 +373,70 @@ export default function CreateTourPage() {
                                 />
                             </div>
                         </div>
+
+                        {/* Image Upload Section */}
+                        <div className="space-y-4 pt-4">
+                            <Label className="text-lg font-bold flex items-center gap-2">
+                                <ImagePlus className="text-primary" size={20} />
+                                Tour Images
+                            </Label>
+                            <Card className="p-6 border-dashed border-2 border-border bg-card/20 hover:bg-card/30 transition-colors">
+                                <div className="flex flex-col items-center justify-center space-y-4">
+                                    <div className="p-4 bg-primary/10 rounded-full">
+                                        {isUploading ? <Loader2 className="animate-spin text-primary" size={32} /> : <ImagePlus className="text-primary" size={32} />}
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="font-semibold">{isUploading ? 'Uploading...' : 'Upload Tour Images'}</p>
+                                        <p className="text-xs text-muted-foreground mt-1">PNG, JPG or WEBP (Max 5MB each)</p>
+                                    </div>
+                                    <Input
+                                        id="image-upload"
+                                        type="file"
+                                        multiple
+                                        className="hidden"
+                                        onChange={handleImageUpload}
+                                        disabled={isUploading}
+                                        accept="image/*"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => document.getElementById('image-upload')?.click()}
+                                        disabled={isUploading}
+                                        className="border-primary text-primary hover:bg-primary/10"
+                                    >
+                                        {isUploading ? 'Please wait...' : 'Select Images'}
+                                    </Button>
+                                </div>
+                            </Card>
+
+                            {/* Image Previews */}
+                            {uploadedImages.length > 0 && (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+                                    {uploadedImages.map((img) => (
+                                        <div key={img.id} className="relative group aspect-square rounded-lg overflow-hidden border border-border bg-secondary shadow-sm">
+                                            <img
+                                                src={img.file}
+                                                alt="Tour preview"
+                                                className="w-full h-full object-fixed transition-transform group-hover:scale-105"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => handleImageDelete(img.id)}
+                                                disabled={deletingImageId === img.id}
+                                                className={`absolute top-2 right-2 p-1.5 bg-destructive/90 text-white rounded-full opacity-100 transition-opacity shadow-lg hover:bg-destructive ${deletingImageId === img.id ? 'cursor-not-allowed' : ''}`}
+                                            >
+                                                {deletingImageId === img.id ? (
+                                                    <Loader2 size={14} className="animate-spin" />
+                                                ) : (
+                                                    <X size={14} />
+                                                )}
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </Card>
 
                     {/* Pricing Sections */}
@@ -289,8 +455,9 @@ export default function CreateTourPage() {
                                         <Label className="text-xs">Max Adults</Label>
                                         <Input
                                             type="number"
+                                            placeholder="e.g. 1"
                                             value={formData.max_adults}
-                                            onChange={e => setFormData({ ...formData, max_adults: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, max_adults: e.target.value })}
                                             className="bg-background border-border"
                                         />
                                     </div>
@@ -298,6 +465,7 @@ export default function CreateTourPage() {
                                         <Label className="text-xs">Price ($)</Label>
                                         <Input
                                             type="text"
+                                            placeholder="e.g. 0.00"
                                             value={formData.price_adult}
                                             onChange={e => setFormData({ ...formData, price_adult: e.target.value })}
                                             className="bg-background border-border"
@@ -307,8 +475,9 @@ export default function CreateTourPage() {
                                         <Label className="text-xs">Min Age</Label>
                                         <Input
                                             type="number"
+                                            placeholder="e.g. 18"
                                             value={formData.adult_age_min}
-                                            onChange={e => setFormData({ ...formData, adult_age_min: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, adult_age_min: e.target.value })}
                                             className="bg-background border-border"
                                         />
                                     </div>
@@ -316,8 +485,9 @@ export default function CreateTourPage() {
                                         <Label className="text-xs">Max Age</Label>
                                         <Input
                                             type="number"
+                                            placeholder="e.g. 99"
                                             value={formData.adult_age_max}
-                                            onChange={e => setFormData({ ...formData, adult_age_max: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, adult_age_max: e.target.value })}
                                             className="bg-background border-border"
                                         />
                                     </div>
@@ -331,14 +501,16 @@ export default function CreateTourPage() {
                                     <div className="space-y-1">
                                         <Label className="text-xs">Max Children</Label>
                                         <Input type="number"
+                                            placeholder="e.g. 0"
                                             value={formData.max_children}
-                                            onChange={e => setFormData({ ...formData, max_children: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, max_children: e.target.value })}
                                             className="bg-background border-border"
                                         />
                                     </div>
                                     <div className="space-y-1">
                                         <Label className="text-xs">Price ($)</Label>
                                         <Input type="text"
+                                            placeholder="e.g. 0.00"
                                             value={formData.price_child}
                                             onChange={e => setFormData({ ...formData, price_child: e.target.value })}
                                             className="bg-background border-border"
@@ -347,16 +519,18 @@ export default function CreateTourPage() {
                                     <div className="space-y-1">
                                         <Label className="text-xs">Min Age</Label>
                                         <Input type="number"
+                                            placeholder="e.g. 3"
                                             value={formData.child_age_min}
-                                            onChange={e => setFormData({ ...formData, child_age_min: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, child_age_min: e.target.value })}
                                             className="bg-background border-border"
                                         />
                                     </div>
                                     <div className="space-y-1">
                                         <Label className="text-xs">Max Age</Label>
                                         <Input type="number"
+                                            placeholder="e.g. 12"
                                             value={formData.child_age_max}
-                                            onChange={e => setFormData({ ...formData, child_age_max: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, child_age_max: e.target.value })}
                                             className="bg-background border-border"
                                         />
                                     </div>
@@ -370,14 +544,16 @@ export default function CreateTourPage() {
                                     <div className="space-y-1">
                                         <Label className="text-xs">Max Infants</Label>
                                         <Input type="number"
+                                            placeholder="e.g. 0"
                                             value={formData.max_infants}
-                                            onChange={e => setFormData({ ...formData, max_infants: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, max_infants: e.target.value })}
                                             className="bg-background border-border"
                                         />
                                     </div>
                                     <div className="space-y-1">
                                         <Label className="text-xs">Price ($)</Label>
                                         <Input type="text"
+                                            placeholder="e.g. 0.00"
                                             value={formData.price_infant}
                                             onChange={e => setFormData({ ...formData, price_infant: e.target.value })}
                                             className="bg-background border-border"
@@ -386,16 +562,18 @@ export default function CreateTourPage() {
                                     <div className="space-y-1">
                                         <Label className="text-xs">Min Age</Label>
                                         <Input type="number"
+                                            placeholder="e.g. 0"
                                             value={formData.infant_age_min}
-                                            onChange={e => setFormData({ ...formData, infant_age_min: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, infant_age_min: e.target.value })}
                                             className="bg-background border-border"
                                         />
                                     </div>
                                     <div className="space-y-1">
                                         <Label className="text-xs">Max Age</Label>
                                         <Input type="number"
+                                            placeholder="e.g. 2"
                                             value={formData.infant_age_max}
-                                            onChange={e => setFormData({ ...formData, infant_age_max: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, infant_age_max: e.target.value })}
                                             className="bg-background border-border"
                                         />
                                     </div>
@@ -409,14 +587,16 @@ export default function CreateTourPage() {
                                     <div className="space-y-1">
                                         <Label className="text-xs">Max Youth</Label>
                                         <Input type="number"
+                                            placeholder="e.g. 0"
                                             value={formData.max_youth}
-                                            onChange={e => setFormData({ ...formData, max_youth: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, max_youth: e.target.value })}
                                             className="bg-background border-border"
                                         />
                                     </div>
                                     <div className="space-y-1">
                                         <Label className="text-xs">Price ($)</Label>
                                         <Input type="text"
+                                            placeholder="e.g. 0.00"
                                             value={formData.price_youth}
                                             onChange={e => setFormData({ ...formData, price_youth: e.target.value })}
                                             className="bg-background border-border"
@@ -425,16 +605,18 @@ export default function CreateTourPage() {
                                     <div className="space-y-1">
                                         <Label className="text-xs">Min Age</Label>
                                         <Input type="number"
+                                            placeholder="e.g. 13"
                                             value={formData.youth_age_min}
-                                            onChange={e => setFormData({ ...formData, youth_age_min: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, youth_age_min: e.target.value })}
                                             className="bg-background border-border"
                                         />
                                     </div>
                                     <div className="space-y-1">
                                         <Label className="text-xs">Max Age</Label>
                                         <Input type="number"
+                                            placeholder="e.g. 17"
                                             value={formData.youth_age_max}
-                                            onChange={e => setFormData({ ...formData, youth_age_max: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, youth_age_max: e.target.value })}
                                             className="bg-background border-border"
                                         />
                                     </div>
@@ -448,14 +630,16 @@ export default function CreateTourPage() {
                                     <div className="space-y-1">
                                         <Label className="text-xs">Max Students</Label>
                                         <Input type="number"
+                                            placeholder="e.g. 0"
                                             value={formData.max_student_eu}
-                                            onChange={e => setFormData({ ...formData, max_student_eu: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, max_student_eu: e.target.value })}
                                             className="bg-background border-border"
                                         />
                                     </div>
                                     <div className="space-y-1">
                                         <Label className="text-xs">Price ($)</Label>
                                         <Input type="text"
+                                            placeholder="e.g. 0.00"
                                             value={formData.price_student_eu}
                                             onChange={e => setFormData({ ...formData, price_student_eu: e.target.value })}
                                             className="bg-background border-border"
@@ -464,16 +648,18 @@ export default function CreateTourPage() {
                                     <div className="space-y-1">
                                         <Label className="text-xs">Min Age</Label>
                                         <Input type="number"
+                                            placeholder="e.g. 18"
                                             value={formData.student_eu_age_min}
-                                            onChange={e => setFormData({ ...formData, student_eu_age_min: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, student_eu_age_min: e.target.value })}
                                             className="bg-background border-border"
                                         />
                                     </div>
                                     <div className="space-y-1">
                                         <Label className="text-xs">Max Age</Label>
                                         <Input type="number"
+                                            placeholder="e.g. 26"
                                             value={formData.student_eu_age_max}
-                                            onChange={e => setFormData({ ...formData, student_eu_age_max: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, student_eu_age_max: e.target.value })}
                                             className="bg-background border-border"
                                         />
                                     </div>
@@ -543,8 +729,9 @@ export default function CreateTourPage() {
                                 <Label>Duration (Days)</Label>
                                 <Input
                                     type="number"
+                                    placeholder="e.g. 1"
                                     value={formData.duration_days}
-                                    onChange={e => setFormData({ ...formData, duration_days: parseInt(e.target.value) })}
+                                    onChange={e => setFormData({ ...formData, duration_days: e.target.value })}
                                     className="border-border bg-background"
                                 />
                             </div>

@@ -63,6 +63,7 @@ export interface TourPlan {
     duration_days: number | null;
     status: string;
     is_active: boolean;
+    image_ids?: number[];
     created_at: string;
     updated_at: string;
 }
@@ -166,4 +167,49 @@ export const createTourPlan = async (token: string, data: Partial<TourPlan>): Pr
     }
 
     return responseData as TourPlan;
+};
+/**
+ * Upload a tour image
+ * @param token Authentication token
+ * @param file Image file to upload
+ * @returns Uploaded image details
+ */
+export const uploadTourImage = async (token: string, file: File): Promise<TourImage> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/tour/image/`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as TourImage;
+};
+
+/**
+ * Delete a tour image
+ * @param token Authentication token
+ * @param id Image ID to delete
+ */
+export const deleteTourImage = async (token: string, id: number): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/tour/image/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const responseData = await response.json().catch(() => ({}));
+        throw responseData;
+    }
 };
