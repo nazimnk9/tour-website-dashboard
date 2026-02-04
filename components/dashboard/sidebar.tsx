@@ -87,7 +87,7 @@ export function Sidebar({ isMobile = false, onClose, isCollapsed = false }: Side
           alt="CityRome Tickets"
           className={cn(
             'h-10 sm:h-12 object-contain transition-all duration-300',
-            isCollapsed && !isMobile ? 'h-8' : 'h-10 sm:h-12'
+            isCollapsed && !isMobile ? 'h-18' : 'h-18 sm:h-22'
           )}
         />
       </div>
