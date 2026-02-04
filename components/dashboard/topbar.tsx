@@ -63,9 +63,9 @@ export function Topbar({
         </div>
 
         {/* Title */}
-        <h1 className="text-lg sm:text-xl font-semibold text-foreground flex-1 ml-4 md:ml-6">
+        {/* <h1 className="text-lg sm:text-xl font-semibold text-foreground flex-1 ml-4 md:ml-6">
           CityRome Tours
-        </h1>
+        </h1> */}
 
         {/* Right side - Can add more items here */}
         <div className="flex items-center gap-2 sm:gap-4">
