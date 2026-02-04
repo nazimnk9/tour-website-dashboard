@@ -116,11 +116,11 @@ export default function ToursPage() {
             className="overflow-hidden border-border hover:shadow-lg transition-all duration-300 flex flex-col group"
           >
             {/* Tour Image */}
-            <div className="relative h-40 sm:h-48 bg-secondary overflow-hidden">
+            <div className="relative h-40 sm:h-64 bg-secondary overflow-hidden">
               <img
                 src={tour.images[0]?.file || "/placeholder.svg"}
                 alt={tour.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-fixed group-hover:scale-105 transition-transform duration-300"
               />
               <Badge className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-primary text-primary-foreground text-xs sm:text-sm px-2 sm:px-3 py-1 rounded">
                 ${tour.price_adult}
