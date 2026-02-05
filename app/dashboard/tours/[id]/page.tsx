@@ -2,18 +2,28 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { useDispatch, useSelector } from 'react-redux'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ChevronLeft, ChevronRight, Edit, Trash2, Plus, Clock, Loader2, AlertCircle } from 'lucide-react'
-import { getTourPlanDetail, TourPlan } from '@/app/lib/api'
+import { ChevronLeft, ChevronRight, Edit, Trash2, Plus, Clock, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { getTourPlanDetail, deleteTourPlan, TourPlan } from '@/app/lib/api'
 import { getCookie } from '@/app/lib/cookies'
 import { LocationModal } from '@/components/dashboard/location-modal'
 import { DateModal } from '@/components/dashboard/date-modal'
 import { fetchTourDates } from '@/app/lib/redux/tour-date-slice'
 import { RootState, AppDispatch } from '@/app/lib/redux/store'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const TimeSlotCount = ({ dateId }: { dateId: string }) => {
   const [count, setCount] = useState<number | null>(null)
@@ -49,6 +59,7 @@ const TimeSlotCount = ({ dateId }: { dateId: string }) => {
 }
 
 export default function TourDetailsPage() {
+  const router = useRouter()
   const params = useParams()
   const tourId = params.id as string
   const dispatch = useDispatch<AppDispatch>()
@@ -56,11 +67,26 @@ export default function TourDetailsPage() {
 
   const [tour, setTour] = useState<TourPlan | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [locationModalOpen, setLocationModalOpen] = useState(false)
   const [dateModalOpen, setDateModalOpen] = useState(false)
   const [locationMode, setLocationMode] = useState<'create' | 'edit'>('create')
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [alertConfig, setAlertConfig] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error';
+    onConfirm?: () => void;
+  }>({
+    show: false,
+    title: '',
+    message: '',
+    type: 'success'
+  })
 
   useEffect(() => {
     const fetchTourDetail = async () => {
@@ -93,6 +119,46 @@ export default function TourDetailsPage() {
   const handleNextImage = () => {
     if (!tour?.images.length) return
     setCurrentImageIndex((prev) => (prev === tour.images.length - 1 ? 0 : prev + 1))
+  }
+
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true)
+      const token = getCookie('access_token')
+      if (!token) {
+        throw new Error('Authentication token not found.')
+      }
+
+      await deleteTourPlan(token, tourId)
+
+      setAlertConfig({
+        show: true,
+        title: 'Success',
+        message: 'Tour deleted successfully.',
+        type: 'success',
+        onConfirm: () => router.push('/dashboard/tours')
+      })
+    } catch (err: any) {
+      console.error('Delete tour error:', err)
+      let errorMessage = 'Failed to delete tour. Please try again.'
+      if (err) {
+        const errorDetails = Object.entries(err).map(([key, value]) => {
+          if (Array.isArray(value)) return `${key}: ${value.join(', ')}`
+          return `${key}: ${value}`
+        }).join('\n')
+        errorMessage = errorDetails || errorMessage
+      }
+
+      setAlertConfig({
+        show: true,
+        title: 'Error',
+        message: errorMessage,
+        type: 'error'
+      })
+    } finally {
+      setIsDeleting(false)
+      setIsDeleteDialogOpen(false)
+    }
   }
 
   if (isLoading) {
@@ -216,6 +282,7 @@ export default function TourDetailsPage() {
             </Link>
             <Button
               variant="outline"
+              onClick={() => setIsDeleteDialogOpen(true)}
               className="flex-1 border-border text-destructive hover:bg-destructive/10 bg-transparent h-10 cursor-pointer"
             >
               <Trash2 size={18} />
@@ -471,6 +538,65 @@ export default function TourDetailsPage() {
         }))}
         tourId={parseInt(tourId)}
       />
+
+      {/* Delete Confirmation Modal */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent className="max-w-md border-destructive/20 bg-background/95 backdrop-blur-lg">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-2 text-destructive mb-2">
+              <Trash2 size={24} />
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-foreground/80 font-medium">
+              This action cannot be undone. This will permanently delete the tour
+              <span className="font-bold text-destructive px-1">"{tour?.title}"</span>
+              and all of its associated data including dates and time slots.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="cursor-pointer border-border bg-transparent hover:bg-secondary">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="cursor-pointer bg-destructive hover:bg-destructive/90 text-white border-0"
+            >
+              {isDeleting ? <Loader2 className="animate-spin" size={18} /> : 'Delete Tour'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Feedback Alert Dialog */}
+      <AlertDialog
+        open={alertConfig.show}
+        onOpenChange={(v) => setAlertConfig({ ...alertConfig, show: v })}
+      >
+        <AlertDialogContent className={`max-w-md border-0 bg-background/95 backdrop-blur-lg shadow-2xl`}>
+          <div className={`absolute top-0 left-0 w-full h-1 ${alertConfig.type === 'success' ? 'bg-primary' : 'bg-destructive'}`} />
+          <AlertDialogHeader>
+            <div className={`flex items-center gap-2 ${alertConfig.type === 'success' ? 'text-primary' : 'text-destructive'} mb-2`}>
+              {alertConfig.type === 'success' ? <CheckCircle2 size={24} /> : <AlertCircle size={24} />}
+              <AlertDialogTitle className="text-xl font-bold">{alertConfig.title}</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-foreground/80 text-base font-medium whitespace-pre-line">
+              {alertConfig.message}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => {
+                setAlertConfig({ ...alertConfig, show: false })
+                if (alertConfig.onConfirm) alertConfig.onConfirm()
+              }}
+              className={`cursor-pointer ${alertConfig.type === 'success' ? 'bg-primary hover:bg-primary/90' : 'bg-destructive hover:bg-destructive/90'} text-white border-0 px-8`}
+            >
+              {alertConfig.type === 'success' ? 'Continue' : 'Okay'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

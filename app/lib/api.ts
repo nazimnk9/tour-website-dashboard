@@ -220,6 +220,24 @@ export const updateTourPlan = async (token: string, id: string, data: Partial<To
     return responseData as TourPlan;
 };
 /**
+ * Delete an existing tour plan
+ * @param token Authentication token
+ * @param id Tour plan ID
+ */
+export const deleteTourPlan = async (token: string, id: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/tour/plan/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const responseData = await response.json().catch(() => ({}));
+        throw responseData;
+    }
+};
+/**
  * Upload a tour image
  * @param token Authentication token
  * @param file Image file to upload
