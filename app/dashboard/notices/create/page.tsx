@@ -86,21 +86,35 @@ export default function CreateNoticePage() {
     return (
         <div className="max-w-4xl mx-auto pb-12 space-y-6">
             {/* Header */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-6">
                 <div className="space-y-1">
-                    <Link
+                    {/* <Link
                         href="/dashboard/notices"
                         className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm mb-2 group w-fit"
                     >
                         <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                         Back to Notices
+                    </Link> */}
+                    <div className="flex items-center gap-4">
+                        <Link
+                        href="/dashboard/notices"
+                        className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm mb-2 group w-fit"
+                    >
+
+                        <Button variant="outline" size="icon" className="border-border bg-transparent cursor-pointer">
+            <ChevronLeft size={20} />
+          </Button>
                     </Link>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Create New Notice</h1>
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight text-foreground">Create New Notice</h1>
                     <p className="text-muted-foreground">Publish a new announcement for the system</p>
+                    </div>
+                    </div>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8 mt-8">
+            <Card className='p-6 border-border shadow-sm space-y-6'>
+                <form onSubmit={handleSubmit} className="space-y-8 mt-8">
                 <Card className="p-6 border-border shadow-sm space-y-6">
                     <div className="space-y-4">
                         <div className="space-y-2">
@@ -130,7 +144,7 @@ export default function CreateNoticePage() {
                 </Card>
 
                 {/* Form Actions */}
-                <div className="flex items-center justify-end gap-4 pt-4 border-l-4 border-primary pl-6 py-2 bg-primary/5 rounded-r-lg">
+                <div className="flex items-center justify-end gap-4 pt-4 pl-6 py-2">
                     <Link href="/dashboard/notices">
                         <Button
                             type="button"
@@ -159,6 +173,7 @@ export default function CreateNoticePage() {
                     </Button>
                 </div>
             </form>
+            </Card>
 
             {/* Alert Dialog */}
             <AlertDialog
