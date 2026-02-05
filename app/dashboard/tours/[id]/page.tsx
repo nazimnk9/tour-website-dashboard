@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useDispatch, useSelector } from 'react-redux'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -11,10 +12,14 @@ import { getTourPlanDetail, TourPlan } from '@/app/lib/api'
 import { getCookie } from '@/app/lib/cookies'
 import { LocationModal } from '@/components/dashboard/location-modal'
 import { DateModal } from '@/components/dashboard/date-modal'
+import { fetchTourDates } from '@/app/lib/redux/tour-date-slice'
+import { RootState, AppDispatch } from '@/app/lib/redux/store'
 
 export default function TourDetailsPage() {
   const params = useParams()
   const tourId = params.id as string
+  const dispatch = useDispatch<AppDispatch>()
+  const { dates: reduxDates, isLoading: isDatesLoading } = useSelector((state: RootState) => state.tourDate)
 
   const [tour, setTour] = useState<TourPlan | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -32,6 +37,8 @@ export default function TourDetailsPage() {
         if (token && tourId) {
           const data = await getTourPlanDetail(token, tourId)
           setTour(data)
+          // Also fetch dates via Redux
+          dispatch(fetchTourDates(parseInt(tourId)))
         } else if (!token) {
           setError('Authentication token not found. Please log in again.')
         }
@@ -43,7 +50,7 @@ export default function TourDetailsPage() {
     }
 
     fetchTourDetail()
-  }, [tourId])
+  }, [tourId, dispatch])
 
   const handlePrevImage = () => {
     if (!tour?.images.length) return
@@ -362,7 +369,7 @@ export default function TourDetailsPage() {
               <h2 className="text-2xl font-bold text-foreground">Date & Tickets</h2>
               <Button
                 size="sm"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
+                className="cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
                 onClick={() => setDateModalOpen(true)}
               >
                 <Plus size={16} />
@@ -370,9 +377,13 @@ export default function TourDetailsPage() {
               </Button>
             </div>
 
-            {(tour as any).dates && (tour as any).dates.length > 0 ? (
+            {isDatesLoading && reduxDates.length === 0 ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : reduxDates.length > 0 ? (
               <div className="space-y-2 mb-4">
-                {(tour as any).dates.map((date: any) => (
+                {reduxDates.map((date: any) => (
                   <div
                     key={date.id}
                     className="flex items-center justify-between bg-secondary p-3 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer"
@@ -383,7 +394,7 @@ export default function TourDetailsPage() {
                       </Badge>
                     </Link>
                     <span className="text-xs text-muted-foreground">
-                      {date.times.length} time slot{date.times.length !== 1 ? 's' : ''}
+                      {(date.times?.length || 0)} time slot{(date.times?.length || 0) !== 1 ? 's' : ''}
                     </span>
                   </div>
                 ))}
@@ -412,11 +423,15 @@ export default function TourDetailsPage() {
       <DateModal
         isOpen={dateModalOpen}
         onClose={() => setDateModalOpen(false)}
-        onSave={() => setDateModalOpen(false)}
-        initialDates={((tour as any).dates || []).map((d: any) => ({
+        onSave={() => {
+          dispatch(fetchTourDates(parseInt(tourId)))
+          setDateModalOpen(false)
+        }}
+        initialDates={reduxDates.map((d: any) => ({
           ...d,
           id: d.id.toString()
         }))}
+        tourId={parseInt(tourId)}
       />
     </div>
   )
