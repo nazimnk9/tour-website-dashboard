@@ -422,15 +422,15 @@ export default function TourDetailsPage() {
                     className="flex items-center justify-between bg-secondary p-3 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer"
                   >
                     {/* <div className="flex flex-row justify-between gap-2"> */}
-                      <Link href={`/dashboard/tours/${tour.id}/dates/${date.id}`}>
-                        <Badge className="bg-primary text-primary-foreground">
-                          {new Date(date.date).toLocaleDateString()}
-                        </Badge>
-                      </Link>
-                      <div className="flex flex-row justify-between gap-2">
+                    <Link href={`/dashboard/tours/${tour.id}/dates/${date.id}`}>
+                      <Badge className="bg-primary text-primary-foreground">
+                        {new Date(date.date).toLocaleDateString()}
+                      </Badge>
+                    </Link>
+                    <div className="flex flex-row justify-between gap-2">
 
                       <TimeSlotCount dateId={date.id.toString()} />
-                      </div>
+                    </div>
                     {/* </div> */}
                   </div>
                 ))}
