@@ -6,10 +6,20 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ChevronLeft, Plus, Edit, Loader2, AlertCircle } from 'lucide-react'
+import { ChevronLeft, Plus, Edit, Loader2, AlertCircle, Trash2 } from 'lucide-react'
 import { TimeFormModal } from '@/components/dashboard/time-form-modal'
-import { getTourTimes, TourTime } from '@/app/lib/api'
+import { getTourTimes, TourTime, deleteTourTime } from '@/app/lib/api'
 import { getCookie } from '@/app/lib/cookies'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function TimesPage() {
   const params = useParams()
@@ -21,6 +31,24 @@ export default function TimesPage() {
   const [error, setError] = useState<string | null>(null)
   const [timeModalOpen, setTimeModalOpen] = useState(false)
   const [editingTime, setEditingTime] = useState<TourTime | null>(null)
+
+  // Deletion state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [idToDelete, setIdToDelete] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  // Alert Dialog State
+  const [alertConfig, setAlertConfig] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error';
+  }>({
+    show: false,
+    title: '',
+    message: '',
+    type: 'success'
+  })
 
   const fetchTimes = useCallback(async () => {
     try {
@@ -42,6 +70,49 @@ export default function TimesPage() {
   useEffect(() => {
     fetchTimes()
   }, [fetchTimes])
+
+  const handleDelete = async () => {
+    if (!idToDelete) return
+
+    try {
+      setIsDeleting(true)
+      const token = getCookie('access_token')
+      if (!token) {
+        throw new Error('Authentication token not found.')
+      }
+
+      await deleteTourTime(token, dateId, idToDelete)
+
+      setAlertConfig({
+        show: true,
+        title: 'Success',
+        message: 'Time slot deleted successfully.',
+        type: 'success'
+      })
+
+      fetchTimes()
+    } catch (err: any) {
+      let errorMessage = 'Failed to delete time slot. Please try again.'
+      if (err) {
+        const errorDetails = Object.entries(err).map(([key, value]) => {
+          if (Array.isArray(value)) return `${key}: ${value.join(', ')}`
+          return `${key}: ${value}`
+        }).join('\n')
+        errorMessage = errorDetails || errorMessage
+      }
+
+      setAlertConfig({
+        show: true,
+        title: 'Error',
+        message: errorMessage,
+        type: 'error'
+      })
+    } finally {
+      setIsDeleting(false)
+      setIsDeleteDialogOpen(false)
+      setIdToDelete(null)
+    }
+  }
 
   const selectedDate = new Date(timeSlots[0]?.tour_date.date || '').toLocaleDateString('en-US', {
     weekday: 'long',
@@ -158,17 +229,29 @@ export default function TimesPage() {
                 </div>
               </div>
 
-              {/* Edit Button */}
-              <Button
-                onClick={() => {
-                  setEditingTime(slot)
-                  setTimeModalOpen(true)
-                }}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Edit size={18} />
-                Edit
-              </Button>
+              <div className='flex flex-row gap-2'>
+                {/* Edit Button */}
+                <Button
+                  onClick={() => {
+                    setEditingTime(slot)
+                    setTimeModalOpen(true)
+                  }}
+                  className=" flex-1 bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Edit size={18} />
+                  Edit
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIdToDelete(slot.id.toString())
+                    setIsDeleteDialogOpen(true)
+                  }}
+                  className="flex-1 bg-destructive text-white hover:bg-destructive/90 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Trash2 size={18} />
+                  Delete
+                </Button>
+              </div>
             </div>
           </Card>
         ))}
@@ -202,6 +285,57 @@ export default function TimesPage() {
         tourDateId={dateId}
         initialData={editingTime}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the time slot.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting} onClick={() => setIdToDelete(null)} className='cursor-pointer'>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-white hover:bg-destructive/90 transition-colors cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault()
+                handleDelete()
+              }}
+              disabled={isDeleting}
+            >
+              {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Feedback Alert Dialog */}
+      <AlertDialog
+        open={alertConfig.show}
+        onOpenChange={(open) => !open && setAlertConfig(prev => ({ ...prev, show: false }))}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className={alertConfig.type === 'error' ? 'text-destructive' : 'text-primary'}>
+              {alertConfig.title}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="whitespace-pre-line text-foreground">
+              {alertConfig.message}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => setAlertConfig(prev => ({ ...prev, show: false }))}
+              className="cursor-pointer"
+            >
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

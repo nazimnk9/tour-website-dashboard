@@ -388,3 +388,23 @@ export const updateTourTime = async (token: string, tourDateId: string, timeId: 
 
     return responseData as TourTime;
 };
+
+/**
+ * Delete a tour time slot
+ * @param token Authentication token
+ * @param tourDateId Tour date ID
+ * @param timeId Time slot ID
+ */
+export const deleteTourTime = async (token: string, tourDateId: string, timeId: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/tour/plan/date/time/${tourDateId}/${timeId}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const responseData = await response.json().catch(() => ({}));
+        throw responseData;
+    }
+};
