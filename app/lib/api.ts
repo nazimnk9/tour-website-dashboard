@@ -166,12 +166,9 @@ export const getTourPlanDetail = async (token: string, id: string): Promise<Tour
 
     const responseData = await response.json();
 
-    if (!response.ok) {
-        throw responseData;
-    }
-
     return responseData as TourPlan;
 };
+
 /**
  * Create a new tour plan
  * @param token Authentication token
@@ -181,6 +178,32 @@ export const getTourPlanDetail = async (token: string, id: string): Promise<Tour
 export const createTourPlan = async (token: string, data: Partial<TourPlan>): Promise<TourPlan> => {
     const response = await fetch(`${API_BASE_URL}/tour/plan/`, {
         method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as TourPlan;
+};
+
+/**
+ * Update an existing tour plan
+ * @param token Authentication token
+ * @param id Tour plan ID
+ * @param data Updated tour plan data
+ * @returns Updated tour plan
+ */
+export const updateTourPlan = async (token: string, id: string, data: Partial<TourPlan>): Promise<TourPlan> => {
+    const response = await fetch(`${API_BASE_URL}/tour/plan/${id}`, {
+        method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
