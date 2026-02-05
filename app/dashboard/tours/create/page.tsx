@@ -260,7 +260,7 @@ export default function CreateTourPage() {
                             addToArray(setter, tempValue)
                             setTempValue('')
                         }}
-                        className="border-border hover:bg-primary/10"
+                        className="border-border hover:bg-primary/10 cursor-pointer"
                     >
                         <Plus size={18} />
                     </Button>
@@ -538,7 +538,7 @@ export default function CreateTourPage() {
                                         setLocationForm({ name: '', description: '' })
                                         setIsLocationModalOpen(true)
                                     }}
-                                    className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-8"
+                                    className="cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-8"
                                 >
                                     <Plus className="mr-1" size={14} />
                                     Add Location
@@ -902,6 +902,7 @@ export default function CreateTourPage() {
                                 <Switch
                                     checked={formData.is_active}
                                     onCheckedChange={(v) => setFormData({ ...formData, is_active: v })}
+                                    className='cursor-pointer'
                                 />
                             </div>
 
@@ -913,6 +914,7 @@ export default function CreateTourPage() {
                                 <Switch
                                     checked={formData.free_cancellation}
                                     onCheckedChange={(v) => setFormData({ ...formData, free_cancellation: v })}
+                                    className='cursor-pointer'
                                 />
                             </div>
 
@@ -924,6 +926,7 @@ export default function CreateTourPage() {
                                 <Switch
                                     checked={formData.pickup_included}
                                     onCheckedChange={(v) => setFormData({ ...formData, pickup_included: v })}
+                                    className='cursor-pointer'
                                 />
                             </div>
 
@@ -990,7 +993,7 @@ export default function CreateTourPage() {
             {/* Form Actions */}
             <div className="flex flex-col sm:flex-row gap-3 pt-8 border-t border-border">
                 <Link href="/dashboard/tours" className="flex-1 sm:flex-initial">
-                    <Button variant="outline" className="w-full border-border bg-transparent flex items-center gap-2 px-6 h-11">
+                    <Button variant="outline" className="cursor-pointer w-full border-border bg-transparent flex items-center gap-2 px-6 h-11">
                         <History size={18} />
                         Back
                     </Button>
@@ -998,7 +1001,7 @@ export default function CreateTourPage() {
                 <Button
                     onClick={handleSubmit}
                     disabled={isLoading}
-                    className="flex-1 sm:flex-initial bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 px-8 h-11"
+                    className="cursor-pointer flex-1 sm:flex-initial bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 px-8 h-11"
                 >
                     {isLoading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                     Create
@@ -1021,7 +1024,7 @@ export default function CreateTourPage() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogAction className="bg-destructive hover:bg-destructive/90 text-white border-0">
+                        <AlertDialogAction className="cursor-pointer bg-destructive hover:bg-destructive/90 text-white border-0">
                             Okay, I'll fix it
                         </AlertDialogAction>
                     </AlertDialogFooter>
@@ -1046,7 +1049,7 @@ export default function CreateTourPage() {
                     <AlertDialogFooter>
                         <AlertDialogAction
                             onClick={() => router.push('/dashboard/tours')}
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground border-0"
+                            className="cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground border-0"
                         >
                             Back to Tours
                         </AlertDialogAction>

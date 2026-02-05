@@ -80,7 +80,7 @@ export default function ToursPage() {
           <p className="text-muted-foreground text-sm sm:text-base">Manage and organize all your tour offerings</p>
         </div>
         <Link href="/dashboard/tours/create">
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 whitespace-nowrap text-sm sm:text-base px-4 py-2 h-10 sm:h-11 rounded-lg">
+          <Button className="cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 whitespace-nowrap text-sm sm:text-base px-4 py-2 h-10 sm:h-11 rounded-lg">
             <Plus size={20} />
             Add New Tours
           </Button>
@@ -102,7 +102,7 @@ export default function ToursPage() {
               className="pl-10 h-10 sm:h-11 border-border text-sm"
             />
           </div>
-          <Button variant="outline" className="border-border bg-transparent text-sm sm:text-base h-10 sm:h-11 hover:bg-secondary">
+          <Button variant="outline" className="cursor-pointer border-border bg-transparent text-sm sm:text-base h-10 sm:h-11 hover:bg-secondary">
             Search
           </Button>
         </div>
@@ -178,7 +178,7 @@ export default function ToursPage() {
             variant="outline"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            className="border-border text-sm h-10 px-4 flex-shrink-0"
+            className="border-border text-sm h-10 px-4 flex-shrink-0 cursor-pointer"
           >
             Previous
           </Button>
@@ -189,7 +189,7 @@ export default function ToursPage() {
                 key={i + 1}
                 variant={currentPage === i + 1 ? 'default' : 'outline'}
                 onClick={() => setCurrentPage(i + 1)}
-                className={`text-sm h-10 w-10 p-0 rounded-lg ${currentPage === i + 1
+                className={`cursor-pointer text-sm h-10 w-10 p-0 rounded-lg ${currentPage === i + 1
                   ? 'bg-primary text-primary-foreground'
                   : 'border-border hover:bg-secondary'
                   }`}
@@ -203,7 +203,7 @@ export default function ToursPage() {
             variant="outline"
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-            className="border-border text-sm h-10 px-4 flex-shrink-0"
+            className="border-border text-sm h-10 px-4 flex-shrink-0 cursor-pointer"
           >
             Next
           </Button>
@@ -216,7 +216,7 @@ export default function ToursPage() {
           <p className="text-muted-foreground mb-6 text-sm sm:text-base font-medium">No tours found matching your search.</p>
           <Button
             variant="outline"
-            className="border-border bg-primary text-primary-foreground hover:bg-primary/90 text-sm h-10 px-6 rounded-lg"
+            className="cursor-pointer border-border bg-primary text-primary-foreground hover:bg-primary/90 text-sm h-10 px-6 rounded-lg"
             onClick={() => setSearchTerm('')}
           >
             Clear Search
