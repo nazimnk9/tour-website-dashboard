@@ -15,6 +15,39 @@ import { DateModal } from '@/components/dashboard/date-modal'
 import { fetchTourDates } from '@/app/lib/redux/tour-date-slice'
 import { RootState, AppDispatch } from '@/app/lib/redux/store'
 
+const TimeSlotCount = ({ dateId }: { dateId: string }) => {
+  const [count, setCount] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const token = getCookie('access_token')
+        if (token) {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/tour/plan/date/time/${dateId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+          const data = await response.json()
+          setCount(data.count || 0)
+        }
+      } catch (err) {
+        console.error('Failed to fetch time count:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchCount()
+  }, [dateId])
+
+  if (isLoading) return <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+
+  return (
+    <span className="text-xs text-muted-foreground mt-1">
+      {count} time slot{count !== 1 ? 's' : ''}
+    </span>
+  )
+}
+
 export default function TourDetailsPage() {
   const params = useParams()
   const tourId = params.id as string
@@ -388,14 +421,17 @@ export default function TourDetailsPage() {
                     key={date.id}
                     className="flex items-center justify-between bg-secondary p-3 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer"
                   >
-                    <Link href={`/dashboard/tours/${tour.id}/dates/${date.id}`}>
-                      <Badge className="bg-primary text-primary-foreground">
-                        {new Date(date.date).toLocaleDateString()}
-                      </Badge>
-                    </Link>
-                    <span className="text-xs text-muted-foreground">
-                      {(date.times?.length || 0)} time slot{(date.times?.length || 0) !== 1 ? 's' : ''}
-                    </span>
+                    {/* <div className="flex flex-row justify-between gap-2"> */}
+                      <Link href={`/dashboard/tours/${tour.id}/dates/${date.id}`}>
+                        <Badge className="bg-primary text-primary-foreground">
+                          {new Date(date.date).toLocaleDateString()}
+                        </Badge>
+                      </Link>
+                      <div className="flex flex-row justify-between gap-2">
+
+                      <TimeSlotCount dateId={date.id.toString()} />
+                      </div>
+                    {/* </div> */}
                   </div>
                 ))}
               </div>

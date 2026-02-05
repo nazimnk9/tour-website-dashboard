@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,17 +12,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
-interface TicketType {
-  tickets: number
-  price: number
-}
+import { createTourTime, updateTourTime, TourTime } from '@/app/lib/api'
+import { getCookie } from '@/app/lib/cookies'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Loader2 } from 'lucide-react'
 
 interface TimeFormModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (timeData: any) => void
+  onSave: () => void
   mode: 'create' | 'edit'
+  tourDateId: string
+  initialData?: TourTime | null
 }
 
 export function TimeFormModal({
@@ -30,27 +39,115 @@ export function TimeFormModal({
   onClose,
   onSave,
   mode,
+  tourDateId,
+  initialData,
 }: TimeFormModalProps) {
-  const [time, setTime] = useState('09:00')
-  const [adult, setAdult] = useState<TicketType>({ tickets: 0, price: 45 })
-  const [child, setChild] = useState<TicketType>({ tickets: 0, price: 25 })
-  const [infant, setInfant] = useState<TicketType>({ tickets: 0, price: 0 })
-  const [youth, setYouth] = useState<TicketType>({ tickets: 0, price: 35 })
-  const [studentEU, setStudentEU] = useState<TicketType>({ tickets: 0, price: 30 })
+  const [startTime, setStartTime] = useState('08:00')
+  const [availableAdults, setAvailableAdults] = useState<number | string>('')
+  const [availableChildren, setAvailableChildren] = useState<number | string>('')
+  const [availableInfants, setAvailableInfants] = useState<number | string>('')
+  const [availableYouth, setAvailableYouth] = useState<number | string>('')
+  const [availableStudentEU, setAvailableStudentEU] = useState<number | string>('')
 
-  const handleSave = () => {
-    onSave({
-      time,
-      capacity: 50,
-      tickets: {
-        adult,
-        child,
-        infant,
-        youth,
-        studentEU,
-      },
-    })
-    onClose()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [alertConfig, setAlertConfig] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error';
+  }>({
+    show: false,
+    title: '',
+    message: '',
+    type: 'success'
+  })
+
+  useEffect(() => {
+    if (mode === 'edit' && initialData) {
+      setStartTime(initialData.start_time.substring(0, 5)) // Format "09:00:00" to "09:00"
+      setAvailableAdults(initialData.available_adults)
+      setAvailableChildren(initialData.available_children)
+      setAvailableInfants(initialData.available_infants)
+      setAvailableYouth(initialData.available_youth)
+      setAvailableStudentEU(initialData.available_student_eu)
+    } else {
+      setStartTime('08:00')
+      setAvailableAdults('')
+      setAvailableChildren('')
+      setAvailableInfants('')
+      setAvailableYouth('')
+      setAvailableStudentEU('')
+    }
+  }, [mode, initialData, isOpen])
+
+  const handleSave = async () => {
+    try {
+      setIsSubmitting(true)
+      const token = getCookie('access_token')
+      if (!token) {
+        setAlertConfig({
+          show: true,
+          title: 'Error',
+          message: 'Authentication token not found. Please log in again.',
+          type: 'error'
+        })
+        return
+      }
+
+      const payload = {
+        start_time: startTime,
+        available_adults: parseInt(availableAdults.toString()) || 0,
+        available_children: parseInt(availableChildren.toString()) || 0,
+        available_infants: parseInt(availableInfants.toString()) || 0,
+        available_youth: parseInt(availableYouth.toString()) || 0,
+        available_student_eu: parseInt(availableStudentEU.toString()) || 0,
+      }
+
+      let response;
+      if (mode === 'create') {
+        response = await createTourTime(token, tourDateId, payload)
+        setAlertConfig({
+          show: true,
+          title: 'Success',
+          message: 'Time slot created successfully.',
+          type: 'success'
+        })
+      } else if (mode === 'edit' && initialData) {
+        response = await updateTourTime(token, tourDateId, initialData.id.toString(), payload)
+        setAlertConfig({
+          show: true,
+          title: 'Success',
+          message: 'Time slot updated successfully.',
+          type: 'success'
+        })
+      }
+    } catch (err: any) {
+      let errorMessage = 'Something went wrong. Please try again.'
+      if (err) {
+        const errorDetails = Object.entries(err).map(([key, value]) => {
+          if (Array.isArray(value)) return `${key}: ${value.join(', ')}`
+          return `${key}: ${value}`
+        }).join('\n')
+        errorMessage = errorDetails || errorMessage
+      }
+      setAlertConfig({
+        show: true,
+        title: 'Error',
+        message: errorMessage,
+        type: 'error'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleAlertClose = () => {
+    const isSuccess = alertConfig.type === 'success'
+    setAlertConfig(prev => ({ ...prev, show: false }))
+    if (isSuccess) {
+      onSave()
+      onClose()
+    }
   }
 
   const timeSlots = [
@@ -60,89 +157,137 @@ export function TimeFormModal({
     '17:00', '17:30', '18:00', '18:30', '19:00'
   ]
 
-  const TicketInputs = ({
-    title,
-    state,
-    setState
-  }: {
-    title: string
-    state: TicketType
-    setState: (state: TicketType) => void
-  }) => (
-    <div className="space-y-3 border-t border-border pt-4">
-      <h3 className="font-medium text-foreground">{title}</h3>
-      <div className="space-y-2">
-        <Label htmlFor={`${title}-tickets`} className="text-sm">
-          Available Tickets
-        </Label>
-        <Input
-          id={`${title}-tickets`}
-          type="number"
-          min="0"
-          value={state.tickets}
-          onChange={(e) =>
-            setState({ ...state, tickets: parseInt(e.target.value) || 0 })
-          }
-          className="border-border"
-        />
-      </div>
-    </div>
-  )
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === 'create' ? 'Add New Time Slot' : 'Edit Time Slot'}
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {mode === 'create' ? 'Add New Time Slot' : 'Edit Time Slot'}
+            </DialogTitle>
+          </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Time Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="time-select" className="text-foreground">
-              Select Time
-            </Label>
-            <Select value={time} onValueChange={setTime}>
-              <SelectTrigger id="time-select" className="border-border">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {timeSlots.map((slot) => (
-                  <SelectItem key={slot} value={slot}>
-                    {slot}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="space-y-6">
+            {/* Time Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="time-select" className="text-foreground">
+                Start Time
+              </Label>
+              <Select value={startTime} onValueChange={setStartTime}>
+                <SelectTrigger id="time-select" className="border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {timeSlots.map((slot) => (
+                    <SelectItem key={slot} value={slot}>
+                      {slot}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Ticket Types */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="adults">Available Adults</Label>
+                <Input
+                  id="adults"
+                  type="number"
+                  placeholder="0"
+                  value={availableAdults}
+                  onChange={(e) => setAvailableAdults(e.target.value)}
+                  className="border-border"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="children">Available Children</Label>
+                <Input
+                  id="children"
+                  type="number"
+                  placeholder="0"
+                  value={availableChildren}
+                  onChange={(e) => setAvailableChildren(e.target.value)}
+                  className="border-border"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="infants">Available Infants</Label>
+                <Input
+                  id="infants"
+                  type="number"
+                  placeholder="0"
+                  value={availableInfants}
+                  onChange={(e) => setAvailableInfants(e.target.value)}
+                  className="border-border"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="youth">Available Youth</Label>
+                <Input
+                  id="youth"
+                  type="number"
+                  placeholder="0"
+                  value={availableYouth}
+                  onChange={(e) => setAvailableYouth(e.target.value)}
+                  className="border-border"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="studentEU">Available Student EU</Label>
+                <Input
+                  id="studentEU"
+                  type="number"
+                  placeholder="0"
+                  value={availableStudentEU}
+                  onChange={(e) => setAvailableStudentEU(e.target.value)}
+                  className="border-border"
+                />
+              </div>
+            </div>
           </div>
 
-          {/* Ticket Types */}
-          <TicketInputs title="Adult" state={adult} setState={setAdult} />
-          <TicketInputs title="Child" state={child} setState={setChild} />
-          <TicketInputs title="Infant" state={infant} setState={setInfant} />
-          <TicketInputs title="Youth" state={youth} setState={setYouth} />
-          <TicketInputs title="Student EU" state={studentEU} setState={setStudentEU} />
-        </div>
+          {/* Footer Buttons */}
+          <div className="flex gap-2 border-t border-border pt-6 mt-6 cursor-pointer">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="flex-1 border-border bg-transparent cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={isSubmitting}
+              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Please wait
+                </>
+              ) : (
+                mode === 'create' ? 'Create Time Slot' : 'Update Time Slot'
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-        {/* Footer Buttons */}
-        <div className="flex gap-2 border-t border-border pt-6 mt-6">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="flex-1 border-border bg-transparent"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSave}
-            className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            {mode === 'create' ? 'Create Time Slot' : 'Update Time Slot'}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+      <AlertDialog open={alertConfig.show} onOpenChange={handleAlertClose}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{alertConfig.title}</AlertDialogTitle>
+            <AlertDialogDescription className="whitespace-pre-line">
+              {alertConfig.message}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handleAlertClose} className="cursor-pointer">OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

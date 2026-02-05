@@ -25,6 +25,33 @@ export interface TourImage {
     status: string;
 }
 
+export interface TourTime {
+    id: number;
+    tour_date: {
+        id: number;
+        date: string;
+        is_active: boolean;
+        created_at: string;
+        tour_plan: number;
+    };
+    start_time: string;
+    end_time: string | null;
+    available_adults: number;
+    available_children: number;
+    available_infants: number;
+    available_youth: number;
+    available_student_eu: number;
+    is_active: boolean;
+    created_at: string;
+}
+
+export interface TourTimeResponse {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: TourTime[];
+}
+
 export interface TourPlan {
     id: number;
     locations: TourLocation[];
@@ -283,4 +310,81 @@ export const deleteTourLocation = async (token: string, id: number): Promise<voi
         const responseData = await response.json().catch(() => ({}));
         throw responseData;
     }
+};
+
+/**
+ * Get tour times for a specific tour date
+ * @param token Authentication token
+ * @param tourDateId Tour date ID
+ * @returns Tour times response
+ */
+export const getTourTimes = async (token: string, tourDateId: string): Promise<TourTimeResponse> => {
+    const response = await fetch(`${API_BASE_URL}/tour/plan/date/time/${tourDateId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as TourTimeResponse;
+};
+
+/**
+ * Create a new tour time slot
+ * @param token Authentication token
+ * @param tourDateId Tour date ID
+ * @param data Tour time data
+ * @returns Created tour time
+ */
+export const createTourTime = async (token: string, tourDateId: string, data: any): Promise<TourTime> => {
+    const response = await fetch(`${API_BASE_URL}/tour/plan/date/time/${tourDateId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as TourTime;
+};
+
+/**
+ * Update an existing tour time slot
+ * @param token Authentication token
+ * @param tourDateId Tour date ID
+ * @param timeId Time slot ID
+ * @param data Updated tour time data
+ * @returns Updated tour time
+ */
+export const updateTourTime = async (token: string, tourDateId: string, timeId: string, data: any): Promise<TourTime> => {
+    const response = await fetch(`${API_BASE_URL}/tour/plan/date/time/${tourDateId}/${timeId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as TourTime;
 };
