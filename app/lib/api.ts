@@ -103,6 +103,20 @@ export interface TourPlanResponse {
     results: TourPlan[];
 }
 
+export interface Notice {
+    id: number;
+    title: string;
+    description: string;
+    is_active: boolean;
+}
+
+export interface NoticeResponse {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: Notice[];
+}
+
 /**
  * Handle API login for admin
  * @param data Login credentials
@@ -438,6 +452,123 @@ export const updateTourTime = async (token: string, tourDateId: string, timeId: 
  */
 export const deleteTourTime = async (token: string, tourDateId: string, timeId: string): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/tour/plan/date/time/${tourDateId}/${timeId}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const responseData = await response.json().catch(() => ({}));
+        throw responseData;
+    }
+};
+
+/**
+ * Get all notices
+ * @param token Authentication token
+ * @returns Notices response
+ */
+export const getNotices = async (token: string): Promise<NoticeResponse> => {
+    const response = await fetch(`${API_BASE_URL}/tour/notice/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as NoticeResponse;
+};
+
+/**
+ * Get single notice detail
+ * @param token Authentication token
+ * @param id Notice ID
+ * @returns Notice detail
+ */
+export const getNoticeDetail = async (token: string, id: string): Promise<Notice> => {
+    const response = await fetch(`${API_BASE_URL}/tour/notice/${id}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as Notice;
+};
+
+/**
+ * Create a new notice
+ * @param token Authentication token
+ * @param data Notice data (title, description)
+ * @returns Created notice details
+ */
+export const createNotice = async (token: string, data: { title: string, description: string }): Promise<Notice> => {
+    const response = await fetch(`${API_BASE_URL}/tour/notice/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as Notice;
+};
+
+/**
+ * Update an existing notice
+ * @param token Authentication token
+ * @param id Notice ID
+ * @param data Updated notice data (title, description, is_active)
+ * @returns Updated notice details
+ */
+export const updateNotice = async (token: string, id: string, data: Partial<Notice>): Promise<Notice> => {
+    const response = await fetch(`${API_BASE_URL}/tour/notice/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as Notice;
+};
+
+/**
+ * Delete an existing notice
+ * @param token Authentication token
+ * @param id Notice ID
+ */
+export const deleteNotice = async (token: string, id: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/tour/notice/${id}`, {
         method: 'DELETE',
         headers: {
             'Authorization': `Bearer ${token}`,
