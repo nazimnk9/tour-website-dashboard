@@ -207,14 +207,14 @@ export default function TourDetailsPage() {
           <div className="p-4 border-t border-border flex gap-2">
             <Button
               variant="outline"
-              className="flex-1 border-border text-primary hover:bg-primary/10 bg-transparent h-10"
+              className="flex-1 border-border text-primary hover:bg-primary/10 bg-transparent h-10 cursor-pointer"
             >
               <Edit size={18} />
               Edit
             </Button>
             <Button
               variant="outline"
-              className="flex-1 border-border text-destructive hover:bg-destructive/10 bg-transparent h-10"
+              className="flex-1 border-border text-destructive hover:bg-destructive/10 bg-transparent h-10 cursor-pointer"
             >
               <Trash2 size={18} />
               Delete
