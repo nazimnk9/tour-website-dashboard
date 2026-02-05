@@ -115,31 +115,31 @@ export default function TimesPage() {
                 <div className="flex justify-between items-center">
                   <Badge variant="outline">Adult</Badge>
                   <span className="text-sm font-semibold">
-                    {slot.tickets.adult.tickets} tickets @ ${slot.tickets.adult.price}
+                    {slot.tickets.adult.tickets} tickets
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <Badge variant="outline">Child</Badge>
                   <span className="text-sm font-semibold">
-                    {slot.tickets.child.tickets} tickets @ ${slot.tickets.child.price}
+                    {slot.tickets.child.tickets} tickets
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <Badge variant="outline">Infant</Badge>
                   <span className="text-sm font-semibold">
-                    {slot.tickets.infant.tickets} tickets @ ${slot.tickets.infant.price}
+                    {slot.tickets.infant.tickets} tickets
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <Badge variant="outline">Youth</Badge>
                   <span className="text-sm font-semibold">
-                    {slot.tickets.youth.tickets} tickets @ ${slot.tickets.youth.price}
+                    {slot.tickets.youth.tickets} tickets
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <Badge variant="outline">Student EU</Badge>
                   <span className="text-sm font-semibold">
-                    {slot.tickets.studentEU.tickets} tickets @ ${slot.tickets.studentEU.price}
+                    {slot.tickets.studentEU.tickets} tickets
                   </span>
                 </div>
               </div>

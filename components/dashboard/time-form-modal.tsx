@@ -60,49 +60,31 @@ export function TimeFormModal({
     '17:00', '17:30', '18:00', '18:30', '19:00'
   ]
 
-  const TicketInputs = ({ 
-    title, 
-    state, 
-    setState 
-  }: { 
+  const TicketInputs = ({
+    title,
+    state,
+    setState
+  }: {
     title: string
     state: TicketType
     setState: (state: TicketType) => void
   }) => (
     <div className="space-y-3 border-t border-border pt-4">
       <h3 className="font-medium text-foreground">{title}</h3>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor={`${title}-tickets`} className="text-sm">
-            Tickets
-          </Label>
-          <Input
-            id={`${title}-tickets`}
-            type="number"
-            min="0"
-            value={state.tickets}
-            onChange={(e) =>
-              setState({ ...state, tickets: parseInt(e.target.value) || 0 })
-            }
-            className="border-border"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor={`${title}-price`} className="text-sm">
-            Price
-          </Label>
-          <Input
-            id={`${title}-price`}
-            type="number"
-            min="0"
-            step="0.01"
-            value={state.price}
-            onChange={(e) =>
-              setState({ ...state, price: parseFloat(e.target.value) || 0 })
-            }
-            className="border-border"
-          />
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor={`${title}-tickets`} className="text-sm">
+          Available Tickets
+        </Label>
+        <Input
+          id={`${title}-tickets`}
+          type="number"
+          min="0"
+          value={state.tickets}
+          onChange={(e) =>
+            setState({ ...state, tickets: parseInt(e.target.value) || 0 })
+          }
+          className="border-border"
+        />
       </div>
     </div>
   )
