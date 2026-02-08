@@ -148,7 +148,7 @@ export interface BookingItem {
     created_at: string;
     booking: number;
     tour_plan: number;
-    time_slot: number;
+    time_slot: number | TourTime;
 }
 
 export interface Booking {
@@ -710,4 +710,28 @@ export const createBooking = async (payload: any, token?: string): Promise<any> 
     }
 
     return responseData;
+};
+
+/**
+ * Get a single booking detail
+ * @param token Authentication token
+ * @param id Booking ID
+ * @returns Booking detail
+ */
+export const getBookingById = async (token: string, id: string): Promise<Booking> => {
+    const response = await fetch(`${API_BASE_URL}/tour/booking/${id}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as Booking;
 };
