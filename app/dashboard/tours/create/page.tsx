@@ -403,7 +403,7 @@ export default function CreateTourPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     <Link href="/dashboard/tours">
-                        <Button variant="outline" size="icon" className="border-border bg-transparent hover:bg-secondary">
+                        <Button variant="outline" size="icon" className="cursor-pointer border-border bg-transparent hover:bg-secondary">
                             <ChevronLeft size={20} />
                         </Button>
                     </Link>
@@ -510,7 +510,7 @@ export default function CreateTourPage() {
                                                 type="button"
                                                 onClick={() => handleImageDelete(img.id)}
                                                 disabled={deletingImageId === img.id}
-                                                className={`absolute top-2 right-2 p-1.5 bg-destructive/90 text-white rounded-full opacity-100 transition-opacity shadow-lg hover:bg-destructive ${deletingImageId === img.id ? 'cursor-not-allowed' : ''}`}
+                                                className={`cursor-pointer absolute top-2 right-2 p-1.5 bg-destructive/90 text-white rounded-full opacity-100 transition-opacity shadow-lg hover:bg-destructive ${deletingImageId === img.id ? 'cursor-not-allowed' : ''}`}
                                             >
                                                 {deletingImageId === img.id ? (
                                                     <Loader2 size={14} className="animate-spin" />
@@ -559,7 +559,7 @@ export default function CreateTourPage() {
                                                     variant="ghost"
                                                     size="icon"
                                                     onClick={() => openEditLocation(loc)}
-                                                    className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
+                                                    className="cursor-pointer h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
                                                 >
                                                     <Edit2 size={14} />
                                                 </Button>
@@ -569,7 +569,7 @@ export default function CreateTourPage() {
                                                     size="icon"
                                                     disabled={deletingLocationId === loc.id}
                                                     onClick={() => handleLocationDelete(loc.id)}
-                                                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                    className="cursor-pointer h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                                                 >
                                                     {deletingLocationId === loc.id ? (
                                                         <Loader2 size={14} className="animate-spin" />
@@ -625,7 +625,7 @@ export default function CreateTourPage() {
                                     type="button"
                                     variant="outline"
                                     onClick={() => setIsLocationModalOpen(false)}
-                                    className="border-border hover:bg-secondary"
+                                    className="cursor-pointer border-border hover:bg-secondary"
                                 >
                                     Cancel
                                 </Button>
@@ -633,7 +633,7 @@ export default function CreateTourPage() {
                                     type="button"
                                     onClick={handleLocationSave}
                                     disabled={isProcessingLocation || !locationForm.name.trim()}
-                                    className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[100px]"
+                                    className="cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground min-w-[100px]"
                                 >
                                     {isProcessingLocation ? <Loader2 size={16} className="animate-spin" /> : (editingLocation ? 'Update' : 'Add Location')}
                                 </Button>
