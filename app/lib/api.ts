@@ -25,6 +25,21 @@ export interface TourImage {
     status: string;
 }
 
+export interface TourDate {
+    id: number;
+    date: string;
+    is_active: boolean;
+    created_at: string;
+    tour_plan: number;
+}
+
+export interface TourDateResponse {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: TourDate[];
+}
+
 export interface TourTime {
     id: number;
     tour_date: {
@@ -115,6 +130,47 @@ export interface NoticeResponse {
     next: string | null;
     previous: string | null;
     results: Notice[];
+}
+
+export interface TravelerDetail {
+    name: string;
+    email?: string;
+}
+
+export interface BookingItem {
+    id: number;
+    num_adults: number;
+    num_children: number;
+    num_infants: number;
+    num_youth: number;
+    num_student_eu: number;
+    item_price: string;
+    created_at: string;
+    booking: number;
+    tour_plan: number;
+    time_slot: number;
+}
+
+export interface Booking {
+    id: number;
+    items: BookingItem[];
+    user_type: string;
+    total_price: string;
+    traveler_details: TravelerDetail[];
+    status: string;
+    cancelled_reason: string | null;
+    booked_by_admin: boolean;
+    created_at: string;
+    updated_at: string;
+    user: number | null;
+    guest_user: number | null;
+}
+
+export interface BookingResponse {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: Booking[];
 }
 
 /**
@@ -579,4 +635,79 @@ export const deleteNotice = async (token: string, id: string): Promise<void> => 
         const responseData = await response.json().catch(() => ({}));
         throw responseData;
     }
+};
+
+/**
+ * Get bookings
+ * @param token Authentication token
+ * @returns Bookings response
+ */
+export const getBookings = async (token: string): Promise<BookingResponse> => {
+    const response = await fetch(`${API_BASE_URL}/tour/booking/`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as BookingResponse;
+};
+
+/**
+ * Get tour dates for a specific tour plan
+ * @param tourId Tour plan ID
+ * @returns Tour dates response
+ */
+export const getTourDates = async (tourId: string): Promise<TourDateResponse> => {
+    const response = await fetch(`${API_BASE_URL}/tour/plan/date/${tourId}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as TourDateResponse;
+};
+
+/**
+ * Create a new booking
+ * @param payload Booking payload
+ * @param token Optional authentication token
+ * @returns Created booking details
+ */
+export const createBooking = async (payload: any, token?: string): Promise<any> => {
+    const headers: HeadersInit = {
+        "Content-Type": "application/json",
+    };
+
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/tour/booking/`, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(payload),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData;
 };

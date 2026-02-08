@@ -8,6 +8,7 @@ import { setCookie, getCookie, deleteCookie } from '@/app/lib/cookies'
 interface AuthContextType {
   isAuthenticated: boolean
   user: { email: string } | null
+  token: string | null
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string | string[] }>
   logout: () => void
 }
@@ -95,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, token: getCookie('access_token') || null, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
