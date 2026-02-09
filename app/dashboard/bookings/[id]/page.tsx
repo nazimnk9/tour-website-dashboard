@@ -100,10 +100,13 @@ export default function BookingDetailsPage() {
                 {booking.status}
               </Badge>
             </div>
-            {booking.cancelled_reason && (
-              <div className="mt-4 p-4 bg-red-50 rounded-lg border border-red-100">
-                <p className="text-sm font-semibold text-red-800">Cancellation Reason:</p>
-                <p className="text-sm text-red-700">{booking.cancelled_reason}</p>
+            {booking.status === 'cancelled' && booking.cancelled_reason && (
+              <div className="mt-4 p-4 bg-red-50 rounded-lg border border-red-100 flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-red-800 mb-1">Cancellation Reason</p>
+                  <p className="text-sm text-red-700 leading-relaxed">{booking.cancelled_reason}</p>
+                </div>
               </div>
             )}
           </Card>

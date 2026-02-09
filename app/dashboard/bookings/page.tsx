@@ -70,15 +70,27 @@ export default function BookingsPage() {
     }
   }
 
-  const handleStatusChange = (bookingId: number, newStatus: string) => {
-    // Handle status update
-    console.log(`Booking ${bookingId} status changed to ${newStatus}`)
-    // For now, just update local state to reflect the change
-    setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: newStatus } : b))
-    setStatusModalOpen(false)
+  const handleStatusChange = () => {
+    // Re-fetch bookings to show updated data
+    const fetchBookings = async () => {
+      if (!token) return
+      try {
+        setLoading(true)
+        const response = await getBookings(token)
+        setBookings(response.results)
+        setError(null)
+      } catch (err: any) {
+        console.error('Error fetching bookings:', err)
+        setError(err.message || 'Failed to fetch bookings')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchBookings()
   }
 
-  if (loading) {
+  if (loading && bookings.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -86,7 +98,7 @@ export default function BookingsPage() {
     )
   }
 
-  if (error) {
+  if (error && bookings.length === 0) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4">
         <AlertCircle className="h-12 w-12 text-destructive" />
@@ -143,7 +155,7 @@ export default function BookingsPage() {
                     </TableCell>
                     <TableCell>
                       <Badge className={`${getStatusColor(booking.status)} text-xs sm:text-sm capitalize font-normal border-none shadow-none`}>
-                        {booking.status}
+                        {booking.status.replace('_', ' ')}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-xs sm:text-sm">
@@ -226,16 +238,17 @@ export default function BookingsPage() {
       )}
 
       {/* Status Modal */}
-      {selectedBooking && (
+      {selectedBooking && token && (
         <StatusModal
           isOpen={statusModalOpen}
           onClose={() => {
             setStatusModalOpen(false)
             setSelectedBookingId(null)
           }}
-          onSave={(newStatus) => handleStatusChange(selectedBookingId!, newStatus)}
+          onSave={handleStatusChange}
           currentStatus={selectedBooking.status}
-          statusOptions={['pending', 'open', 'confirmed', 'cancelled']}
+          bookingId={selectedBooking.id}
+          token={token}
         />
       )}
     </div>

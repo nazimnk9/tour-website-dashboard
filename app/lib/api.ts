@@ -735,3 +735,28 @@ export const getBookingById = async (token: string, id: string): Promise<Booking
 
     return responseData as Booking;
 };
+/**
+ * Update a booking status
+ * @param token Authentication token
+ * @param id Booking ID
+ * @param data Patch data (e.g., { status: 'in_review', cancelled_reason: 'User requested' })
+ * @returns Updated booking details
+ */
+export const updateBookingStatus = async (token: string, id: number, data: { status: string, cancelled_reason?: string | null }): Promise<Booking> => {
+    const response = await fetch(`${API_BASE_URL}/tour/booking/${id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as Booking;
+};
