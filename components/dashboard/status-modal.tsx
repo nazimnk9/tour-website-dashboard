@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { updateBookingStatus } from '@/app/lib/api'
+import { updateBookingStatus, updateContactRequestStatus } from '@/app/lib/api'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,8 +30,10 @@ interface StatusModalProps {
   onClose: () => void
   onSave: () => void
   currentStatus: string
-  bookingId: number
+  id: string | number
   token: string
+  type?: 'booking' | 'contact'
+  statusOptions?: string[]
 }
 
 export function StatusModal({
@@ -39,8 +41,10 @@ export function StatusModal({
   onClose,
   onSave,
   currentStatus,
-  bookingId,
+  id,
   token,
+  type = 'booking',
+  statusOptions: providedOptions,
 }: StatusModalProps) {
   const [newStatus, setNewStatus] = useState(currentStatus)
   const [cancelledReason, setCancelledReason] = useState('')
@@ -49,7 +53,8 @@ export function StatusModal({
   const [alertType, setAlertType] = useState<'success' | 'error'>('success')
   const [alertMessage, setAlertMessage] = useState('')
 
-  const statusOptions = ["open", "in_review", "accepted", "cancelled", "completed"]
+  const defaultBookingOptions = ["open", "in_review", "accepted", "cancelled", "completed"]
+  const statusOptions = providedOptions || defaultBookingOptions
 
   const handleSave = async () => {
     try {
@@ -61,14 +66,19 @@ export function StatusModal({
         payload.cancelled_reason = null
       }
 
-      await updateBookingStatus(token, bookingId, payload)
+      if (type === 'contact') {
+        await updateContactRequestStatus(token, id, payload)
+      } else {
+        await updateBookingStatus(token, id as number, payload)
+      }
+
       setAlertType('success')
-      setAlertMessage('Booking status has been updated successfully.')
+      setAlertMessage(`${type === 'contact' ? 'Contact request' : 'Booking'} status has been updated successfully.`)
       setShowAlert(true)
     } catch (err: any) {
       console.error('Error updating status:', err)
       setAlertType('error')
-      let errorMessage = 'Failed to update booking status.'
+      let errorMessage = `Failed to update ${type} status.`
       if (err.status && Array.isArray(err.status)) {
         errorMessage = err.status.join(', ')
       } else if (err.detail) {
@@ -94,9 +104,11 @@ export function StatusModal({
       case 'completed':
       case 'accepted':
       case 'confirmed':
+      case 'resolved':
         return 'bg-green-100 text-green-800'
       case 'open':
       case 'in_review':
+      case 'in-progress':
       case 'pending':
         return 'bg-blue-100 text-blue-800'
       case 'cancelled':
@@ -143,7 +155,7 @@ export function StatusModal({
             </div>
 
             {/* Cancelled Reason */}
-            {newStatus === 'cancelled' && (
+            {(type === 'booking' || type === 'contact') && newStatus === 'cancelled' && (
               <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
                 <Label htmlFor="cancelled-reason" className="text-foreground">
                   Cancelled Reason

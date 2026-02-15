@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -12,43 +12,112 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Eye } from 'lucide-react'
-import { mockContactRequests } from '@/app/lib/mock-data'
+import { Eye, Loader2, AlertCircle } from 'lucide-react'
 import { StatusModal } from '@/components/dashboard/status-modal'
 import { ContactRequestModal } from '@/components/dashboard/contact-request-modal'
+import { getContactRequests, ContactRequest } from '@/app/lib/api'
+import { useAuth } from '@/app/contexts/auth-context'
 
 const ITEMS_PER_PAGE = 10
 
+interface UIContactRequest {
+  id: string
+  name: string
+  email: string
+  message: string
+  status: string
+  createdAt: string
+  subject: string
+  phone: string
+  cancelled_reason: string | null
+}
+
 export default function ContactRequestsPage() {
+  const { token } = useAuth()
+  const [requests, setRequests] = useState<UIContactRequest[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [statusModalOpen, setStatusModalOpen] = useState(false)
   const [detailsModalOpen, setDetailsModalOpen] = useState(false)
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null)
 
-  const totalPages = Math.ceil(mockContactRequests.length / ITEMS_PER_PAGE)
-  const paginatedRequests = mockContactRequests.slice(
+  const fetchRequests = async () => {
+    if (!token) return
+    try {
+      setLoading(true)
+      const data = await getContactRequests(token)
+      const mapped = data.results.map((r: any) => ({
+        id: String(r.id),
+        name: `${r.first_name} ${r.last_name}`,
+        email: r.email,
+        message: r.message,
+        status: r.status,
+        createdAt: r.created_at || new Date().toISOString(),
+        subject: r.subject,
+        phone: r.phone,
+        cancelled_reason: r.cancelled_reason
+      }))
+      setRequests(mapped)
+      setError(null)
+    } catch (err: any) {
+      console.error('Error fetching contact requests:', err)
+      setError('Failed to load contact requests')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchRequests()
+  }, [token])
+
+  const totalPages = Math.ceil(requests.length / ITEMS_PER_PAGE)
+  const paginatedRequests = requests.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   )
 
-  const selectedRequest = mockContactRequests.find((r) => r.id === selectedRequestId)
+  const selectedRequest = requests.find((r) => r.id === selectedRequestId)
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'resolved':
+      case 'completed':
         return 'bg-green-100 text-green-800'
+      case 'in_review':
       case 'in-progress':
         return 'bg-blue-100 text-blue-800'
+      case 'open':
       case 'new':
         return 'bg-purple-100 text-purple-800'
+      case 'cancelled':
+        return 'bg-red-100 text-red-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
   }
 
-  const handleStatusChange = (requestId: string, newStatus: string) => {
-    console.log(`Request ${requestId} status changed to ${newStatus}`)
-    setStatusModalOpen(false)
+  const handleStatusChange = () => {
+    fetchRequests()
+  }
+
+  if (loading && requests.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (error && requests.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <AlertCircle className="h-12 w-12 text-destructive" />
+        <p className="text-lg font-medium text-foreground">{error}</p>
+        <Button onClick={() => fetchRequests()}>Try Again</Button>
+      </div>
+    )
   }
 
   return (
@@ -74,48 +143,58 @@ export default function ContactRequestsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedRequests.map((request) => (
-                <TableRow key={request.id} className="border-border hover:bg-secondary/50 transition-colors">
-                  <TableCell className="font-medium text-foreground text-xs sm:text-sm truncate">{request.id.slice(0, 8)}</TableCell>
-                  <TableCell className="text-muted-foreground text-xs sm:text-sm truncate">{request.name}</TableCell>
-                  <TableCell className="text-muted-foreground text-xs sm:text-sm truncate">{request.email}</TableCell>
-                  <TableCell>
-                    <Badge className={`${getStatusColor(request.status)} text-xs sm:text-sm`}>
-                      {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-xs sm:text-sm">
-                    {new Date(request.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-border text-primary hover:bg-primary/10 bg-transparent text-xs h-8 px-2 rounded"
-                        onClick={() => {
-                          setSelectedRequestId(request.id)
-                          setDetailsModalOpen(true)
-                        }}
-                      >
-                        <Eye size={14} />
-                        <span className="hidden sm:inline ml-1">View</span>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-border text-primary hover:bg-primary/10 bg-transparent text-xs h-8 px-2 rounded"
-                        onClick={() => {
-                          setSelectedRequestId(request.id)
-                          setStatusModalOpen(true)
-                        }}
-                      >
-                        Status
-                      </Button>
-                    </div>
+              {paginatedRequests.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    No contact requests found.
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                paginatedRequests.map((request) => (
+                  <TableRow key={request.id} className="border-border hover:bg-secondary/50 transition-colors">
+                    <TableCell className="font-medium text-foreground text-xs sm:text-sm truncate">#{request.id}</TableCell>
+                    <TableCell className="text-muted-foreground text-xs sm:text-sm truncate">{request.name}</TableCell>
+                    <TableCell className="text-muted-foreground text-xs sm:text-sm truncate break-all">{request.email}</TableCell>
+                    <TableCell>
+                      <Badge className={`${getStatusColor(request.status)} text-xs sm:text-sm`}>
+                        {request.status.replace('_', ' ').charAt(0).toUpperCase() + request.status.replace('_', ' ').slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-xs sm:text-sm">
+                      {request.createdAt !== 'N/A'
+                        ? new Date(request.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                        : 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-border text-primary hover:bg-primary/10 bg-transparent text-xs h-8 px-2 rounded"
+                          onClick={() => {
+                            setSelectedRequestId(request.id)
+                            setDetailsModalOpen(true)
+                          }}
+                        >
+                          <Eye size={14} />
+                          <span className="hidden sm:inline ml-1">View</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-border text-primary hover:bg-primary/10 bg-transparent text-xs h-8 px-2 rounded"
+                          onClick={() => {
+                            setSelectedRequestId(request.id)
+                            setStatusModalOpen(true)
+                          }}
+                        >
+                          Status
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
@@ -128,7 +207,7 @@ export default function ContactRequestsPage() {
             variant="outline"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            className="border-border text-sm h-10 px-4 flex-shrink-0"
+            className="border-border text-sm h-10 px-4 flex-shrink-0 rounded-lg hover:bg-secondary transition-all"
           >
             Previous
           </Button>
@@ -139,11 +218,10 @@ export default function ContactRequestsPage() {
                 key={i + 1}
                 variant={currentPage === i + 1 ? 'default' : 'outline'}
                 onClick={() => setCurrentPage(i + 1)}
-                className={`text-sm h-10 w-10 p-0 rounded-lg ${
-                  currentPage === i + 1
-                    ? 'bg-primary text-primary-foreground'
-                    : 'border-border hover:bg-secondary'
-                }`}
+                className={`text-sm h-10 w-10 p-0 rounded-lg transition-all ${currentPage === i + 1
+                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                  : 'border-border hover:bg-secondary'
+                  }`}
               >
                 {i + 1}
               </Button>
@@ -154,7 +232,7 @@ export default function ContactRequestsPage() {
             variant="outline"
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-            className="border-border text-sm h-10 px-4 flex-shrink-0"
+            className="border-border text-sm h-10 px-4 flex-shrink-0 rounded-lg hover:bg-secondary transition-all"
           >
             Next
           </Button>
@@ -174,16 +252,19 @@ export default function ContactRequestsPage() {
       )}
 
       {/* Status Modal */}
-      {selectedRequest && (
+      {selectedRequest && token && (
         <StatusModal
           isOpen={statusModalOpen}
           onClose={() => {
             setStatusModalOpen(false)
             setSelectedRequestId(null)
           }}
-          onSave={(newStatus) => handleStatusChange(selectedRequestId!, newStatus)}
+          onSave={handleStatusChange}
           currentStatus={selectedRequest.status}
-          statusOptions={['new', 'in-progress', 'resolved']}
+          id={selectedRequest.id}
+          token={token}
+          type="contact"
+          statusOptions={["open", "in_review", "cancelled", "completed"]}
         />
       )}
     </div>

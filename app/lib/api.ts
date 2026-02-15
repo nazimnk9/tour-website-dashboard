@@ -173,6 +173,25 @@ export interface BookingResponse {
     results: Booking[];
 }
 
+export interface ContactRequest {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+    subject: string;
+    message: string;
+    status: string;
+    cancelled_reason: string | null;
+}
+
+export interface ContactRequestResponse {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: ContactRequest[];
+}
+
 /**
  * Handle API login for admin
  * @param data Login credentials
@@ -661,6 +680,29 @@ export const getBookings = async (token: string): Promise<BookingResponse> => {
 };
 
 /**
+ * Get contact requests
+ * @param token Authentication token
+ * @returns Contact requests response
+ */
+export const getContactRequests = async (token: string): Promise<ContactRequestResponse> => {
+    const response = await fetch(`${API_BASE_URL}/tour/contacts/`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as ContactRequestResponse;
+};
+
+/**
  * Get tour dates for a specific tour plan
  * @param tourId Tour plan ID
  * @returns Tour dates response
@@ -810,4 +852,29 @@ export const updateBookingItem = async (token: string, id: string, data: any): P
     }
 
     return responseData;
+};
+/**
+ * Update a contact request status
+ * @param token Authentication token
+ * @param id Request ID
+ * @param data Patch data (e.g., { status: 'completed', cancelled_reason: 'Resolved' })
+ * @returns Updated contact request details
+ */
+export const updateContactRequestStatus = async (token: string, id: string | number, data: { status: string, cancelled_reason?: string | null }): Promise<ContactRequest> => {
+    const response = await fetch(`${API_BASE_URL}/tour/contacts/${id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as ContactRequest;
 };

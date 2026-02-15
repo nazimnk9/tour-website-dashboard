@@ -247,7 +247,7 @@ export default function BookingsPage() {
           }}
           onSave={handleStatusChange}
           currentStatus={selectedBooking.status}
-          bookingId={selectedBooking.id}
+          id={selectedBooking.id}
           token={token}
         />
       )}
