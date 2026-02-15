@@ -256,10 +256,15 @@ export default function BookingDetailsPage() {
               </div>
             </div>
 
-            <div className="mt-8 space-y-3">
-              <Button asChild className="w-full">
+            <div className="mt-8 flex gap-3">
+              <Button asChild variant="outline" className="flex-1">
                 <Link href="/dashboard/bookings">
                   Back to All Bookings
+                </Link>
+              </Button>
+              <Button asChild className="flex-1">
+                <Link href={`/dashboard/bookings/${booking.id}/edit`}>
+                  Edit
                 </Link>
               </Button>
             </div>

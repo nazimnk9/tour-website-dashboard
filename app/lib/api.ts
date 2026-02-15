@@ -760,3 +760,54 @@ export const updateBookingStatus = async (token: string, id: number, data: { sta
 
     return responseData as Booking;
 };
+/**
+ * Update a booking
+ * @param token Authentication token
+ * @param id Booking ID
+ * @param data Patch data
+ * @returns Updated booking details
+ */
+export const updateBooking = async (token: string, id: string, data: any): Promise<Booking> => {
+    const response = await fetch(`${API_BASE_URL}/tour/booking/${id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as Booking;
+};
+
+/**
+ * Update a booking item
+ * @param token Authentication token
+ * @param id Item ID
+ * @param data Patch data
+ * @returns Updated item details
+ */
+export const updateBookingItem = async (token: string, id: string, data: any): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/tour/booking/items/${id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData;
+};
