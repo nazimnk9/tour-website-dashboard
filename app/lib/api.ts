@@ -192,6 +192,23 @@ export interface ContactRequestResponse {
     results: ContactRequest[];
 }
 
+export interface AuthUser {
+    id?: string | number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string | null;
+    password?: string;
+    role: string;
+}
+
+export interface AuthUserResponse {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: AuthUser[];
+}
+
 /**
  * Handle API login for admin
  * @param data Login credentials
@@ -877,4 +894,121 @@ export const updateContactRequestStatus = async (token: string, id: string | num
     }
 
     return responseData as ContactRequest;
+};
+
+/**
+ * Get auth users
+ * @param token Authentication token
+ * @returns Auth users response
+ */
+export const getAuthUsers = async (token: string): Promise<AuthUserResponse> => {
+    const response = await fetch(`${API_BASE_URL}/auth/users/`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as AuthUserResponse;
+};
+
+/**
+ * Create a new auth user
+ * @param token Authentication token
+ * @param data User data (first_name, last_name, email, phone, password, role)
+ * @returns Created user details
+ */
+export const createAuthUser = async (token: string, data: AuthUser): Promise<AuthUser> => {
+    const response = await fetch(`${API_BASE_URL}/auth/users/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as AuthUser;
+};
+
+/**
+ * Get a single auth user detail
+ * @param token Authentication token
+ * @param id User ID or email
+ * @returns User details
+ */
+export const getAuthUserDetail = async (token: string, id: string): Promise<AuthUser> => {
+    const response = await fetch(`${API_BASE_URL}/auth/users/${id}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as AuthUser;
+};
+
+/**
+ * Update an existing auth user
+ * @param token Authentication token
+ * @param id User ID or email
+ * @param data Partial user data
+ * @returns Updated user details
+ */
+export const updateAuthUser = async (token: string, id: string, data: Partial<AuthUser>): Promise<AuthUser> => {
+    const response = await fetch(`${API_BASE_URL}/auth/users/${id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as AuthUser;
+};
+
+/**
+ * Delete an auth user
+ * @param token Authentication token
+ * @param id User ID or email
+ */
+export const deleteAuthUser = async (token: string, id: string | number): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/auth/users/${id}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        },
+    });
+
+    if (!response.ok) {
+        const responseData = await response.json().catch(() => ({}));
+        throw responseData;
+    }
 };
