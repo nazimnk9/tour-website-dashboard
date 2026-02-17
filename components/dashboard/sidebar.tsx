@@ -33,7 +33,7 @@ interface SidebarProps {
 
 export function Sidebar({ isMobile = false, onClose, isCollapsed = false }: SidebarProps) {
   const pathname = usePathname()
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
 
   const routes = [
@@ -134,21 +134,23 @@ export function Sidebar({ isMobile = false, onClose, isCollapsed = false }: Side
         {/* Bottom Section - Settings & Logout */}
         <div className="border-t border-sidebar-border p-3 space-y-2 flex-shrink-0">
           {/* Settings Link */}
-          <Link
-            href="/dashboard/settings"
-            onClick={handleLinkClick}
-            className={cn(
-              'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-sm font-medium',
-              isCollapsed && !isMobile ? 'justify-center p-3' : '',
-              pathname.includes('/settings')
-                ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-            )}
-            title={isCollapsed && !isMobile ? 'Settings' : undefined}
-          >
-            <Settings size={20} className="flex-shrink-0" />
-            {shouldShowLabels && <span>Settings</span>}
-          </Link>
+          {user?.role !== 'ADMIN' && (
+            <Link
+              href="/dashboard/settings"
+              onClick={handleLinkClick}
+              className={cn(
+                'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-sm font-medium',
+                isCollapsed && !isMobile ? 'justify-center p-3' : '',
+                pathname.includes('/settings')
+                  ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                  : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+              )}
+              title={isCollapsed && !isMobile ? 'Settings' : undefined}
+            >
+              <Settings size={20} className="flex-shrink-0" />
+              {shouldShowLabels && <span>Settings</span>}
+            </Link>
+          )}
 
           {/* Logout Button */}
           <button

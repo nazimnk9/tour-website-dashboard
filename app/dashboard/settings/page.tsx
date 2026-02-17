@@ -27,10 +27,22 @@ import { UserFormModal } from '@/components/dashboard/user-form-modal'
 import { getAuthUsers, AuthUser, deleteAuthUser } from '@/app/lib/api'
 import { useAuth } from '@/app/contexts/auth-context'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function SettingsPage() {
-  const { token } = useAuth()
+  const { token, user } = useAuth()
+  const router = useRouter()
   const [users, setUsers] = useState<AuthUser[]>([])
+
+  useEffect(() => {
+    if (user && user.role === 'ADMIN') {
+      router.push('/dashboard')
+    }
+  }, [user, router])
+
+  if (user && user.role === 'ADMIN') {
+    return null
+  }
   const [loading, setLoading] = useState(true)
   const [userModalOpen, setUserModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<AuthUser | null>(null)

@@ -2,12 +2,12 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { loginAdmin, ApiErrorResponse } from '@/app/lib/api'
+import { loginAdmin, getCurrentUser, ApiErrorResponse } from '@/app/lib/api'
 import { setCookie, getCookie, deleteCookie } from '@/app/lib/cookies'
 
 interface AuthContextType {
   isAuthenticated: boolean
-  user: { email: string } | null
+  user: any | null
   token: string | null
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string | string[] }>
   logout: () => void
@@ -17,30 +17,34 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState<{ email: string } | null>(null)
+  const [user, setUser] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
   const pathname = usePathname()
 
   // Initialize auth state from cookies
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const accessToken = getCookie('access_token')
 
       if (accessToken) {
-        setIsAuthenticated(true)
-        setUser({ email: 'admin@example.com' }) // In a real app, decode JWT
+        try {
+          const userData = await getCurrentUser(accessToken)
+          setIsAuthenticated(true)
+          setUser(userData)
 
-        // If logged in and trying to access login page, redirect to dashboard
-        if (pathname === '/login') {
-          router.push('/dashboard')
+          if (pathname === '/login') {
+            router.push('/dashboard')
+          }
+        } catch (error) {
+          console.error('Check auth error:', error)
+          logout()
         }
       } else {
         setIsAuthenticated(false)
         setUser(null)
 
-        // If not logged in and not on login page, redirect to login
-        if (pathname !== '/login') {
+        if (pathname !== '/login' && !pathname.includes('/get-started')) {
           router.push('/login')
         }
       }
@@ -58,8 +62,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setCookie('access_token', response.access, 1)
       setCookie('refresh_token', response.refresh, 7)
 
+      // Fetch user data
+      const userData = await getCurrentUser(response.access)
       setIsAuthenticated(true)
-      setUser({ email })
+      setUser(userData)
+
       router.push('/dashboard')
       return { success: true }
     } catch (err) {

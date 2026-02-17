@@ -1012,3 +1012,26 @@ export const deleteAuthUser = async (token: string, id: string | number): Promis
         throw responseData;
     }
 };
+
+/**
+ * Get current user profile detail
+ * @param token Authentication token
+ * @returns User profile details
+ */
+export const getCurrentUser = async (token: string): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/me/`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData;
+};
