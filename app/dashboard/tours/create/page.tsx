@@ -165,19 +165,19 @@ export default function CreateTourPage() {
 
             const payload = {
                 ...formData,
-                max_adults: parseNumber(formData.max_adults),
+                //max_adults: parseNumber(formData.max_adults),
                 adult_age_min: parseNumber(formData.adult_age_min),
                 adult_age_max: parseNumber(formData.adult_age_max),
-                max_children: parseNumber(formData.max_children),
+                //max_children: parseNumber(formData.max_children),
                 child_age_min: parseNumber(formData.child_age_min),
                 child_age_max: parseNumber(formData.child_age_max),
-                max_infants: parseNumber(formData.max_infants),
+                //max_infants: parseNumber(formData.max_infants),
                 infant_age_min: parseNumber(formData.infant_age_min),
                 infant_age_max: parseNumber(formData.infant_age_max),
-                max_youth: parseNumber(formData.max_youth),
+                //max_youth: parseNumber(formData.max_youth),
                 youth_age_min: parseNumber(formData.youth_age_min),
                 youth_age_max: parseNumber(formData.youth_age_max),
-                max_student_eu: parseNumber(formData.max_student_eu),
+                //max_student_eu: parseNumber(formData.max_student_eu),
                 student_eu_age_min: parseNumber(formData.student_eu_age_min),
                 student_eu_age_max: parseNumber(formData.student_eu_age_max),
                 duration_days: parseNumber(formData.duration_days),
@@ -653,7 +653,7 @@ export default function CreateTourPage() {
                                     <Badge variant="outline" className="border-primary/30 text-primary">Required</Badge>
                                 </h3>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
+                                    {/* <div className="space-y-1">
                                         <Label className="text-xs">Max Adults</Label>
                                         <Input
                                             type="number"
@@ -662,7 +662,7 @@ export default function CreateTourPage() {
                                             onChange={e => setFormData({ ...formData, max_adults: e.target.value })}
                                             className="bg-background border-border"
                                         />
-                                    </div>
+                                    </div> */}
                                     <div className="space-y-1">
                                         <Label className="text-xs">Price ($)</Label>
                                         <Input
@@ -700,7 +700,7 @@ export default function CreateTourPage() {
                             <Card className="p-4 border-border bg-card/50 shadow-sm space-y-4">
                                 <h3 className="font-bold text-foreground">Children</h3>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
+                                    {/* <div className="space-y-1">
                                         <Label className="text-xs">Max Children</Label>
                                         <Input type="number"
                                             placeholder="e.g. 0"
@@ -708,7 +708,7 @@ export default function CreateTourPage() {
                                             onChange={e => setFormData({ ...formData, max_children: e.target.value })}
                                             className="bg-background border-border"
                                         />
-                                    </div>
+                                    </div> */}
                                     <div className="space-y-1">
                                         <Label className="text-xs">Price ($)</Label>
                                         <Input type="text"
@@ -743,7 +743,7 @@ export default function CreateTourPage() {
                             <Card className="p-4 border-border bg-card/50 shadow-sm space-y-4">
                                 <h3 className="font-bold text-foreground">Infants</h3>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
+                                    {/* <div className="space-y-1">
                                         <Label className="text-xs">Max Infants</Label>
                                         <Input type="number"
                                             placeholder="e.g. 0"
@@ -751,7 +751,7 @@ export default function CreateTourPage() {
                                             onChange={e => setFormData({ ...formData, max_infants: e.target.value })}
                                             className="bg-background border-border"
                                         />
-                                    </div>
+                                    </div> */}
                                     <div className="space-y-1">
                                         <Label className="text-xs">Price ($)</Label>
                                         <Input type="text"
@@ -786,7 +786,7 @@ export default function CreateTourPage() {
                             <Card className="p-4 border-border bg-card/50 shadow-sm space-y-4">
                                 <h3 className="font-bold text-foreground">Youth</h3>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
+                                    {/* <div className="space-y-1">
                                         <Label className="text-xs">Max Youth</Label>
                                         <Input type="number"
                                             placeholder="e.g. 0"
@@ -794,7 +794,7 @@ export default function CreateTourPage() {
                                             onChange={e => setFormData({ ...formData, max_youth: e.target.value })}
                                             className="bg-background border-border"
                                         />
-                                    </div>
+                                    </div> */}
                                     <div className="space-y-1">
                                         <Label className="text-xs">Price ($)</Label>
                                         <Input type="text"
@@ -829,7 +829,7 @@ export default function CreateTourPage() {
                             <Card className="p-4 border-border bg-card/50 shadow-sm space-y-4">
                                 <h3 className="font-bold text-foreground">Students (EU)</h3>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
+                                    {/* <div className="space-y-1">
                                         <Label className="text-xs">Max Students</Label>
                                         <Input type="number"
                                             placeholder="e.g. 0"
@@ -837,7 +837,7 @@ export default function CreateTourPage() {
                                             onChange={e => setFormData({ ...formData, max_student_eu: e.target.value })}
                                             className="bg-background border-border"
                                         />
-                                    </div>
+                                    </div> */}
                                     <div className="space-y-1">
                                         <Label className="text-xs">Price ($)</Label>
                                         <Input type="text"
