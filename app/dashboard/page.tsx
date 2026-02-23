@@ -4,9 +4,11 @@ import { Card } from "@/components/ui/card"
 
 import React from "react"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Calendar, DollarSign, Briefcase, Users, ChevronDown, TrendingDown } from 'lucide-react'
+import { getDashboardStats, DashboardStats } from '@/app/lib/api'
+import { useAuth } from '@/app/contexts/auth-context'
 
 const chartData = [
   { month: 'Jan', tours: 4, bookings: 2 },
@@ -25,22 +27,28 @@ interface StatCardProps {
   textColor: string
   completedRate?: number
   showProgress?: boolean
+  loading?: boolean
 }
 
-function StatCard({ title, value, icon, bgColor, textColor, completedRate, showProgress }: StatCardProps) {
-  const [timeRange, setTimeRange] = useState('7days')
+function StatCard({ title, value, icon, bgColor, textColor, completedRate, showProgress, loading }: StatCardProps) {
+  if (loading) {
+    return (
+      <div className={`${bgColor} rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-white shadow-lg animate-pulse`}>
+        <div className="flex items-start justify-between mb-4 sm:mb-6">
+          <div className="bg-white bg-opacity-20 p-2 sm:p-3 rounded-lg w-12 h-12"></div>
+        </div>
+        <div className="h-4 bg-white/20 rounded w-24 mb-2"></div>
+        <div className="h-8 bg-white/20 rounded w-16 mb-4"></div>
+        {showProgress && <div className="h-2 bg-white/20 rounded-full w-full"></div>}
+      </div>
+    )
+  }
 
   return (
     <div className={`${bgColor} rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-white shadow-lg hover:shadow-xl transition-shadow`}>
       <div className="flex items-start justify-between mb-4 sm:mb-6">
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="bg-white bg-opacity-20 p-2 sm:p-3 rounded-lg flex-shrink-0">{icon}</div>
-        </div>
-        <div className="relative">
-          <button className="flex items-center gap-1 text-white text-xs sm:text-sm font-medium hover:opacity-80 transition-opacity flex-shrink-0">
-            Last 7 days
-            <ChevronDown size={14} className="sm:w-4 sm:h-4" />
-          </button>
         </div>
       </div>
 
@@ -63,6 +71,27 @@ function StatCard({ title, value, icon, bgColor, textColor, completedRate, showP
 }
 
 export default function DashboardPage() {
+  const { token } = useAuth()
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!token) return
+      try {
+        setLoading(true)
+        const data = await getDashboardStats(token)
+        setStats(data)
+      } catch (error) {
+        console.error('Error fetching dashboard stats:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [token])
+
   return (
     <div className="space-y-6 sm:space-y-8 pb-8">
       {/* Page Header */}
@@ -72,95 +101,40 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Cards - Fully Responsive Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <StatCard
           title="BOOKINGS"
-          value="0"
+          value={stats?.total_bookings || 0}
           icon={<Calendar className="text-white" size={28} />}
           bgColor="bg-orange-500"
           textColor="text-orange-500"
-          completedRate={45}
+          completedRate={parseFloat(stats?.completion_rate || '0')}
           showProgress={true}
+          loading={loading}
         />
 
         <StatCard
           title="TOTAL INCOME"
-          value="$0"
+          value={`€${(stats?.total_income || 0).toLocaleString()}`}
           icon={<DollarSign className="text-white" size={28} />}
           bgColor="bg-green-500"
           textColor="text-green-500"
+          loading={loading}
         />
 
         <StatCard
           title="CLIENT REQUESTS"
-          value="0"
+          value={stats?.total_client_request || 0}
           icon={<Briefcase className="text-white" size={28} />}
           bgColor="bg-blue-500"
           textColor="text-blue-500"
-        />
-
-        <StatCard
-          title="TOTAL CLIENTS"
-          value="0"
-          icon={<Users className="text-white" size={28} />}
-          bgColor="bg-purple-500"
-          textColor="text-purple-500"
+          loading={loading}
         />
       </div>
 
       {/* Charts - Stack on mobile, side by side on desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Bar Chart */}
-        <div className="bg-card border border-border rounded-lg p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
-          <h2 className="text-base sm:text-lg font-semibold text-foreground mb-4">Tours Created</h2>
-          <div className="w-full h-64 sm:h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="month" stroke="var(--color-muted-foreground)" tick={{ fontSize: 12 }} />
-                <YAxis stroke="var(--color-muted-foreground)" tick={{ fontSize: 12 }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--color-card)',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                  }}
-                />
-                <Bar dataKey="tours" fill="var(--color-primary)" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Line Chart */}
-        <div className="bg-card border border-border rounded-lg p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
-          <h2 className="text-base sm:text-lg font-semibold text-foreground mb-4">Bookings Trend</h2>
-          <div className="w-full h-64 sm:h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="month" stroke="var(--color-muted-foreground)" tick={{ fontSize: 12 }} />
-                <YAxis stroke="var(--color-muted-foreground)" tick={{ fontSize: 12 }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--color-card)',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="bookings"
-                  stroke="var(--color-primary)"
-                  strokeWidth={2}
-                  dot={{ fill: 'var(--color-primary)', r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        {/* Charts area remained commented out or empty as in source */}
       </div>
     </div>
   )

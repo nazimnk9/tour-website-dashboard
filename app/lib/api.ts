@@ -209,6 +209,14 @@ export interface AuthUserResponse {
     results: AuthUser[];
 }
 
+export interface DashboardStats {
+    total_bookings: number;
+    completed_bookings: number;
+    completion_rate: string;
+    total_income: number;
+    total_client_request: number;
+}
+
 /**
  * Handle API login for admin
  * @param data Login credentials
@@ -676,10 +684,16 @@ export const deleteNotice = async (token: string, id: string): Promise<void> => 
 /**
  * Get bookings
  * @param token Authentication token
+ * @param page Optional page number for pagination
  * @returns Bookings response
  */
-export const getBookings = async (token: string): Promise<BookingResponse> => {
-    const response = await fetch(`${API_BASE_URL}/tour/booking/`, {
+export const getBookings = async (token: string, page?: number): Promise<BookingResponse> => {
+    let url = `${API_BASE_URL}/tour/booking/`;
+    if (page) {
+        url += `?page=${page}`;
+    }
+
+    const response = await fetch(url, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -1034,4 +1048,27 @@ export const getCurrentUser = async (token: string): Promise<any> => {
     }
 
     return responseData;
+};
+
+/**
+ * Get dashboard statistics
+ * @param token Authentication token
+ * @returns Dashboard statistics
+ */
+export const getDashboardStats = async (token: string): Promise<DashboardStats> => {
+    const response = await fetch(`${API_BASE_URL}/dashboard`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        throw responseData;
+    }
+
+    return responseData as DashboardStats;
 };

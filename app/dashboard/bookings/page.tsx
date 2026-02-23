@@ -18,7 +18,7 @@ import { StatusModal } from '@/components/dashboard/status-modal'
 import { getBookings, Booking } from '@/app/lib/api'
 import { useAuth } from '@/app/contexts/auth-context'
 
-const ITEMS_PER_PAGE = 10
+const ITEMS_PER_PAGE = 20
 
 export default function BookingsPage() {
   const { token } = useAuth()
@@ -26,33 +26,31 @@ export default function BookingsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
   const [statusModalOpen, setStatusModalOpen] = useState(false)
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null)
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      if (!token) return
-      try {
-        setLoading(true)
-        const response = await getBookings(token)
-        setBookings(response.results)
-        setError(null)
-      } catch (err: any) {
-        console.error('Error fetching bookings:', err)
-        setError(err.message || 'Failed to fetch bookings')
-      } finally {
-        setLoading(false)
-      }
+  const fetchBookings = async (page: number) => {
+    if (!token) return
+    try {
+      setLoading(true)
+      const response = await getBookings(token, page)
+      setBookings(response.results)
+      setTotalCount(response.count)
+      setError(null)
+    } catch (err: any) {
+      console.error('Error fetching bookings:', err)
+      setError(err.message || 'Failed to fetch bookings')
+    } finally {
+      setLoading(false)
     }
+  }
 
-    fetchBookings()
-  }, [token])
+  useEffect(() => {
+    fetchBookings(currentPage)
+  }, [token, currentPage])
 
-  const totalPages = Math.ceil(bookings.length / ITEMS_PER_PAGE)
-  const paginatedBookings = bookings.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  )
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 
   const selectedBooking = bookings.find((b) => b.id === selectedBookingId)
 
@@ -71,26 +69,10 @@ export default function BookingsPage() {
   }
 
   const handleStatusChange = () => {
-    // Re-fetch bookings to show updated data
-    const fetchBookings = async () => {
-      if (!token) return
-      try {
-        setLoading(true)
-        const response = await getBookings(token)
-        setBookings(response.results)
-        setError(null)
-      } catch (err: any) {
-        console.error('Error fetching bookings:', err)
-        setError(err.message || 'Failed to fetch bookings')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchBookings()
+    fetchBookings(currentPage)
   }
 
-  if (loading && bookings.length === 0) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -139,14 +121,14 @@ export default function BookingsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedBookings.length === 0 ? (
+              {bookings.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                     No bookings found.
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedBookings.map((booking) => (
+                bookings.map((booking) => (
                   <TableRow key={booking.id} className="border-border hover:bg-secondary/50 transition-colors">
                     <TableCell className="font-medium text-foreground text-xs sm:text-sm">#{booking.id}</TableCell>
                     <TableCell className="text-muted-foreground text-xs sm:text-sm capitalize">{booking.user_type}</TableCell>
@@ -200,40 +182,45 @@ export default function BookingsPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 overflow-x-auto pb-4">
-          <Button
-            variant="outline"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            className="border-border text-sm h-10 px-4 flex-shrink-0"
-          >
-            Previous
-          </Button>
-
-          <div className="flex gap-1 flex-shrink-0">
-            {Array.from({ length: totalPages }).map((_, i) => (
-              <Button
-                key={i + 1}
-                variant={currentPage === i + 1 ? 'default' : 'outline'}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`text-sm h-10 w-10 p-0 rounded-lg ${currentPage === i + 1
-                  ? 'bg-primary text-primary-foreground'
-                  : 'border-border hover:bg-secondary'
-                  }`}
-              >
-                {i + 1}
-              </Button>
-            ))}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 px-2">
+          <div className="text-sm text-muted-foreground order-2 sm:order-1">
+            Page {currentPage} of {totalPages} ({totalCount} total bookings)
           </div>
+          <div className="flex items-center gap-2 overflow-x-auto order-1 sm:order-2">
+            <Button
+              variant="outline"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              className="border-border text-sm h-10 px-4 flex-shrink-0"
+            >
+              Previous
+            </Button>
 
-          <Button
-            variant="outline"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-            className="border-border text-sm h-10 px-4 flex-shrink-0"
-          >
-            Next
-          </Button>
+            <div className="flex gap-1 flex-shrink-0">
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <Button
+                  key={i + 1}
+                  variant={currentPage === i + 1 ? 'default' : 'outline'}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`text-sm h-10 w-10 p-0 rounded-lg ${currentPage === i + 1
+                    ? 'bg-primary text-primary-foreground'
+                    : 'border-border hover:bg-secondary'
+                    }`}
+                >
+                  {i + 1}
+                </Button>
+              ))}
+            </div>
+
+            <Button
+              variant="outline"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              className="border-border text-sm h-10 px-4 flex-shrink-0"
+            >
+              Next
+            </Button>
+          </div>
         </div>
       )}
 
