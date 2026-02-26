@@ -34,7 +34,7 @@ function StatCard({ title, value, icon, bgColor, textColor, completedRate, showP
   if (loading) {
     return (
       <div className={`${bgColor} rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-white shadow-lg animate-pulse`}>
-        <div className="flex items-start justify-between mb-4 sm:mb-6">
+        <div className="flex items-start justify-between mb-2 sm:mb-3">
           <div className="bg-white bg-opacity-20 p-2 sm:p-3 rounded-lg w-12 h-12"></div>
         </div>
         <div className="h-4 bg-white/20 rounded w-24 mb-2"></div>
@@ -45,15 +45,15 @@ function StatCard({ title, value, icon, bgColor, textColor, completedRate, showP
   }
 
   return (
-    <div className={`${bgColor} rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-white shadow-lg hover:shadow-xl transition-shadow`}>
+    <div className={`${bgColor} rounded-xl sm:rounded-2xl p-3 sm:p-4 text-white shadow-md hover:shadow-lg transition-shadow`}>
       <div className="flex items-start justify-between mb-4 sm:mb-6">
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="bg-white bg-opacity-20 p-2 sm:p-3 rounded-lg flex-shrink-0">{icon}</div>
+          <div className="bg-white/20 p-1.5 sm:p-2 rounded-md flex-shrink-0">{icon}</div>
         </div>
       </div>
 
-      <h3 className="text-sm sm:text-lg font-semibold mb-1 sm:mb-2 opacity-90">{title}</h3>
-      <p className="text-xl font-semibold mb-3 sm:mb-4">{value}</p>
+      <h3 className="text-xs sm:text-sm font-semibold mb-1 opacity-90">{title}</h3>
+      <p className="text-lg sm:text-xl font-semibold mb-2">{value}</p>
 
       {showProgress && completedRate !== undefined && (
         <div className="mt-3 sm:mt-4">
@@ -105,7 +105,7 @@ export default function DashboardPage() {
         <StatCard
           title="BOOKINGS"
           value={stats?.total_bookings || 0}
-          icon={<Calendar className="text-white" size={28} />}
+          icon={<Calendar className="text-white" size={22} />}
           bgColor="bg-orange-500"
           textColor="text-orange-500"
           completedRate={parseFloat(stats?.completion_rate || '0')}
