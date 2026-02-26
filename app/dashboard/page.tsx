@@ -53,7 +53,7 @@ function StatCard({ title, value, icon, bgColor, textColor, completedRate, showP
       </div>
 
       <h3 className="text-sm sm:text-lg font-semibold mb-1 sm:mb-2 opacity-90">{title}</h3>
-      <p className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4">{value}</p>
+      <p className="text-xl font-semibold mb-3 sm:mb-4">{value}</p>
 
       {showProgress && completedRate !== undefined && (
         <div className="mt-3 sm:mt-4">
@@ -96,7 +96,7 @@ export default function DashboardPage() {
     <div className="space-y-6 sm:space-y-8 pb-8">
       {/* Page Header */}
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">Dashboard</h1>
+        <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
         <p className="text-muted-foreground text-sm sm:text-base">Welcome to your admin panel. Here's an overview of your tours and bookings.</p>
       </div>
 
