@@ -116,7 +116,7 @@ export function Sidebar({ isMobile = false, onClose, isCollapsed = false }: Side
                 href={route.href}
                 onClick={handleLinkClick}
                 className={cn(
-                  'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-sm font-medium',
+                  'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-sm font-base',
                   isCollapsed && !isMobile ? 'justify-center p-3' : '',
                   route.active
                     ? 'bg-sidebar-primary text-sidebar-primary-foreground'
@@ -139,7 +139,7 @@ export function Sidebar({ isMobile = false, onClose, isCollapsed = false }: Side
               href="/dashboard/settings"
               onClick={handleLinkClick}
               className={cn(
-                'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-sm font-medium',
+                'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-sm font-base',
                 isCollapsed && !isMobile ? 'justify-center p-3' : '',
                 pathname.includes('/settings')
                   ? 'bg-sidebar-primary text-sidebar-primary-foreground'
@@ -156,7 +156,7 @@ export function Sidebar({ isMobile = false, onClose, isCollapsed = false }: Side
           <button
             onClick={() => setShowLogoutDialog(true)}
             className={cn(
-              'cursor-pointer flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 w-full text-sm font-medium',
+              'cursor-pointer flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 w-full text-sm font-base',
               isCollapsed && !isMobile ? 'justify-center p-3' : '',
               'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
             )}
