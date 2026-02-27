@@ -566,7 +566,7 @@ export default function EditTourPage() {
                                         setLocationForm({ name: '', description: '' })
                                         setIsLocationModalOpen(true)
                                     }}
-                                    className="cursor-pointer text-black/80 hover:bg-primary/10 bg-transparent text-xs h-8"
+                                    className="cursor-pointer text-black/80 hover:bg-primary/10 bg-transparent border border-1 text-xs h-8"
                                 >
                                     <Plus className="mr-1" size={14} />
                                     Add Location

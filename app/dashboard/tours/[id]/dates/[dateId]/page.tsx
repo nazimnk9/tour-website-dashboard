@@ -167,7 +167,7 @@ export default function TimesPage() {
             setEditingTime(null)
             setTimeModalOpen(true)
           }}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 cursor-pointer"
+          className="text-black/80 hover:bg-primary/10 bg-transparent border border-1 flex items-center gap-2 cursor-pointer"
         >
           <Plus size={20} />
           Add New Time
@@ -236,7 +236,7 @@ export default function TimesPage() {
                     setEditingTime(slot)
                     setTimeModalOpen(true)
                   }}
-                  className=" flex-1 bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
+                  className=" flex-1 text-black/80 hover:bg-primary/10 bg-transparent border border-1 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Edit size={18} />
                   Edit
