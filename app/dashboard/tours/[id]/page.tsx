@@ -471,7 +471,7 @@ export default function TourDetailsPage() {
               <h2 className="text-lg font-medium text-foreground">Date & Tickets</h2>
               <Button
                 size="sm"
-                className="cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
+                className="cursor-pointer text-black/80 text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
                 onClick={() => setDateModalOpen(true)}
               >
                 <Plus size={16} />
