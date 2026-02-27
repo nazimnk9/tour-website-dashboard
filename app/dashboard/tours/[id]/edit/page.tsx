@@ -518,7 +518,7 @@ export default function EditTourPage() {
                                         variant="outline"
                                         onClick={() => document.getElementById('image-upload')?.click()}
                                         disabled={isUploading}
-                                        className="border-primary text-primary hover:bg-primary/10"
+                                        className="border-primary text-primary hover:text-black/80 hover:bg-primary/10"
                                     >
                                         {isUploading ? 'Please wait...' : 'Select Images'}
                                     </Button>
@@ -566,7 +566,7 @@ export default function EditTourPage() {
                                         setLocationForm({ name: '', description: '' })
                                         setIsLocationModalOpen(true)
                                     }}
-                                    className="cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-8"
+                                    className="cursor-pointer text-black/80 hover:bg-primary/10 bg-transparent text-xs h-8"
                                 >
                                     <Plus className="mr-1" size={14} />
                                     Add Location
