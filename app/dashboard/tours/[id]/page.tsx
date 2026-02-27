@@ -295,7 +295,7 @@ export default function TourDetailsPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Overview Section */}
           <Card className="p-6 border-border shadow-md space-y-6">
-            <h2 className="text-xl font-semibold text-foreground">Overview</h2>
+            <h2 className="text-lg font-medium text-foreground">Overview</h2>
 
             {tour.full_description && (
               <div className="prose prose-sm max-w-none text-muted-foreground wrap-break-word">
@@ -305,7 +305,7 @@ export default function TourDetailsPage() {
 
             {tour.highlights && tour.highlights.length > 0 && (
               <div className="space-y-3 pt-4 border-t border-border">
-                <h3 className="text-lg font-semibold text-foreground">Highlights</h3>
+                <h3 className="text-lg font-medium text-foreground">Highlights</h3>
                 <ul className="grid grid-cols-1 md:grid-cols-1 gap-2">
                   {tour.highlights.map((item, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
@@ -321,7 +321,7 @@ export default function TourDetailsPage() {
           {/* Locations Section - RESTORED */}
           <Card className="p-6 border-border shadow-md">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-foreground">Locations</h2>
+              <h2 className="text-lg font-medium text-foreground">Locations</h2>
               {/* <Button
                 size="sm"
                 className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
@@ -377,7 +377,7 @@ export default function TourDetailsPage() {
           <Card className="p-6 border-border shadow-md">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <h3 className="text-lg font-semibold text-foreground mb-4">Includes</h3>
+                <h3 className="text-lg font-medium text-foreground mb-4">Includes</h3>
                 {tour.includes.length > 0 ? (
                   <ul className="space-y-2">
                     {tour.includes.map((item, i) => (
@@ -392,7 +392,7 @@ export default function TourDetailsPage() {
                 )}
               </div>
               <div className="pt-6 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-8">
-                <h3 className="text-lg font-semibold text-foreground mb-4">Excludes</h3>
+                <h3 className="text-lg font-medium text-foreground mb-4">Excludes</h3>
                 {tour.excludes.length > 0 ? (
                   <ul className="space-y-2">
                     {tour.excludes.map((item, i) => (
@@ -411,11 +411,11 @@ export default function TourDetailsPage() {
 
           {/* Important Information */}
           <Card className="p-6 border-border shadow-md space-y-6">
-            <h2 className="text-xl font-semibold text-foreground">Important Information</h2>
+            <h2 className="text-lg font-medium text-foreground">Important Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-3">Know Before You Go</h3>
+                  <h3 className="text-lg font-medium text-foreground mb-3">Know Before You Go</h3>
                   {tour.know_before_you_go.length > 0 ? (
                     <ul className="space-y-3">
                       {tour.know_before_you_go.map((item, i) => (
@@ -432,7 +432,7 @@ export default function TourDetailsPage() {
               </div>
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-3">Not Allowed</h3>
+                  <h3 className="text-lg font-medium text-foreground mb-3">Not Allowed</h3>
                   {tour.not_allowed.length > 0 ? (
                     <ul className="space-y-2">
                       {tour.not_allowed.map((item, i) => (
@@ -447,7 +447,7 @@ export default function TourDetailsPage() {
                   )}
                 </div>
                 <div className="pt-6 border-t border-border">
-                  <h3 className="text-lg font-semibold text-foreground mb-3">Not Suitable For</h3>
+                  <h3 className="text-lg font-medium text-foreground mb-3">Not Suitable For</h3>
                   {tour.not_suitable_for.length > 0 ? (
                     <ul className="space-y-2">
                       {tour.not_suitable_for.map((item, i) => (
@@ -468,7 +468,7 @@ export default function TourDetailsPage() {
           {/* Dates & Tickets Section - RESTORED */}
           <Card className="p-6 border-border shadow-md">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-foreground">Date & Tickets</h2>
+              <h2 className="text-lg font-medium text-foreground">Date & Tickets</h2>
               <Button
                 size="sm"
                 className="cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
