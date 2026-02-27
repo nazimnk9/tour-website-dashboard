@@ -88,25 +88,26 @@ export default function ToursPage() {
       </div>
 
       {/* Search Bar */}
-      <Card className="p-4 sm:p-6 border-border shadow-sm">
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
-            <Input
-              placeholder="Search tours by title or description..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value)
-                setCurrentPage(1)
-              }}
-              className="pl-10 h-10 sm:h-11 border-border text-sm"
-            />
-          </div>
-          <Button variant="outline" className="cursor-pointer border-border bg-transparent text-sm sm:text-base h-10 sm:h-11 hover:bg-secondary">
-            Search
-          </Button>
+      {/* <Card className="p-4 sm:p-6 border-border shadow-sm">
+        
+      </Card> */}
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
+          <Input
+            placeholder="Search tours by title or description..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value)
+              setCurrentPage(1)
+            }}
+            className="pl-10 h-10 sm:h-11 border-border text-sm"
+          />
         </div>
-      </Card>
+        <Button variant="outline" className="cursor-pointer border-border bg-transparent text-sm sm:text-base h-10 sm:h-11 hover:bg-secondary">
+          Search
+        </Button>
+      </div>
 
       {/* Tours Grid - Fully responsive */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 auto-rows-fr">
