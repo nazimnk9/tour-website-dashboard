@@ -174,7 +174,7 @@ export default function TourDetailsPage() {
       <div className="flex flex-col items-center justify-center min-h-screen text-center p-4">
         <Card className="p-8 max-w-md border-border">
           <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-          <h2 className="text-xl font-bold mb-2">{error || "Tour not found"}</h2>
+          <h2 className="text-xl font-semibold mb-2">{error || "Tour not found"}</h2>
           <Link href="/dashboard/tours">
             <Button className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90">
               Back to Tours
@@ -196,7 +196,7 @@ export default function TourDetailsPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">{tour.title}</h1>
+            <h1 className="text-xl font-semibold text-foreground mb-2">{tour.title}</h1>
             <p className="text-muted-foreground text-sm sm:text-base line-clamp-2 md:line-clamp-none">{tour.description}</p>
           </div>
         </div>
@@ -245,7 +245,7 @@ export default function TourDetailsPage() {
           <Card className="p-6 border-border shadow-md space-y-4">
             <div>
               <p className="text-muted-foreground text-xs uppercase font-semibold tracking-wider mb-1">Starting From</p>
-              <p className="text-4xl font-bold text-primary">${tour.price_adult}</p>
+              <p className="text-2x font-semibold text-primary">${tour.price_adult}</p>
             </div>
             {tour.duration_days && (
               <div className="flex items-center gap-2 pt-2 border-t border-border">
@@ -295,7 +295,7 @@ export default function TourDetailsPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Overview Section */}
           <Card className="p-6 border-border shadow-md space-y-6">
-            <h2 className="text-2xl font-bold text-foreground">Overview</h2>
+            <h2 className="text-xl font-semibold text-foreground">Overview</h2>
 
             {tour.full_description && (
               <div className="prose prose-sm max-w-none text-muted-foreground wrap-break-word">
@@ -321,7 +321,7 @@ export default function TourDetailsPage() {
           {/* Locations Section - RESTORED */}
           <Card className="p-6 border-border shadow-md">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-foreground">Locations</h2>
+              <h2 className="text-xl font-semibold text-foreground">Locations</h2>
               {/* <Button
                 size="sm"
                 className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
@@ -411,7 +411,7 @@ export default function TourDetailsPage() {
 
           {/* Important Information */}
           <Card className="p-6 border-border shadow-md space-y-6">
-            <h2 className="text-2xl font-bold text-foreground">Important Information</h2>
+            <h2 className="text-xl font-semibold text-foreground">Important Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <div>
@@ -468,7 +468,7 @@ export default function TourDetailsPage() {
           {/* Dates & Tickets Section - RESTORED */}
           <Card className="p-6 border-border shadow-md">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-foreground">Date & Tickets</h2>
+              <h2 className="text-xl font-semibold text-foreground">Date & Tickets</h2>
               <Button
                 size="sm"
                 className="cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
@@ -549,7 +549,7 @@ export default function TourDetailsPage() {
             </div>
             <AlertDialogDescription className="text-foreground/80 font-medium">
               This action cannot be undone. This will permanently delete the tour
-              <span className="font-bold text-destructive px-1">"{tour?.title}"</span>
+              <span className="font-semibold text-destructive px-1">"{tour?.title}"</span>
               and all of its associated data including dates and time slots.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -578,7 +578,7 @@ export default function TourDetailsPage() {
           <AlertDialogHeader>
             <div className={`flex items-center gap-2 ${alertConfig.type === 'success' ? 'text-primary' : 'text-destructive'} mb-2`}>
               {alertConfig.type === 'success' ? <CheckCircle2 size={24} /> : <AlertCircle size={24} />}
-              <AlertDialogTitle className="text-xl font-bold">{alertConfig.title}</AlertDialogTitle>
+              <AlertDialogTitle className="text-lg font-semibold">{alertConfig.title}</AlertDialogTitle>
             </div>
             <AlertDialogDescription className="text-foreground/80 text-base font-medium whitespace-pre-line">
               {alertConfig.message}
