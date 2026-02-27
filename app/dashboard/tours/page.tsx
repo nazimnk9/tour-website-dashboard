@@ -76,7 +76,7 @@ export default function ToursPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
         <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">Tours</h1>
+          <h1 className="text-xl font-semibold text-foreground mb-2">Tours</h1>
           <p className="text-muted-foreground text-sm sm:text-base">Manage and organize all your tour offerings</p>
         </div>
         <Link href="/dashboard/tours/create">
@@ -129,7 +129,7 @@ export default function ToursPage() {
 
             {/* Tour Info */}
             <div className="p-4 sm:p-5 flex-1 flex flex-col">
-              <h3 className="text-base sm:text-lg font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+              <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                 {tour.title}
               </h3>
               <p className="text-muted-foreground text-xs sm:text-sm mb-4 line-clamp-3 flex-1">
