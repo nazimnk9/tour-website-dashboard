@@ -274,7 +274,7 @@ export default function TourDetailsPage() {
             <Link href={`/dashboard/tours/${tour.id}/edit`} className="flex-1">
               <Button
                 variant="outline"
-                className="w-full border-border text-primary hover:bg-primary/10 bg-transparent h-10 cursor-pointer"
+                className="w-full border-border text-primary hover:text-black/80 hover:bg-primary/10 bg-transparent h-10 cursor-pointer"
               >
                 <Edit size={18} />
                 Edit
