@@ -170,7 +170,7 @@ export default function ContactRequestsPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="border-border text-primary hover:bg-primary/10 bg-transparent text-xs h-8 px-2 rounded"
+                          className="border-border text-black/80 hover:bg-primary/10 bg-transparent text-xs h-8 px-2 rounded"
                           onClick={() => {
                             setSelectedRequestId(request.id)
                             setDetailsModalOpen(true)
@@ -182,7 +182,7 @@ export default function ContactRequestsPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="border-border text-primary hover:bg-primary/10 bg-transparent text-xs h-8 px-2 rounded"
+                          className="border-border text-black/80 hover:bg-primary/10 bg-transparent text-xs h-8 px-2 rounded"
                           onClick={() => {
                             setSelectedRequestId(request.id)
                             setStatusModalOpen(true)
