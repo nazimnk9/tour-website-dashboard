@@ -274,7 +274,7 @@ export default function TourDetailsPage() {
             <Link href={`/dashboard/tours/${tour.id}/edit`} className="flex-1">
               <Button
                 variant="outline"
-                className="w-full border-border text-primary hover:text-black/80 hover:bg-primary/10 bg-transparent h-10 cursor-pointer"
+                className="w-full border-border text-black/80 hover:text-black/80 hover:bg-primary/10 bg-transparent h-10 cursor-pointer"
               >
                 <Edit size={18} />
                 Edit
@@ -283,7 +283,7 @@ export default function TourDetailsPage() {
             <Button
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(true)}
-              className="flex-1 border-border text-destructive hover:bg-destructive/10 bg-transparent h-10 cursor-pointer"
+              className="flex-1 border-border text-destructive hover:text-destructive hover:bg-destructive/10 bg-transparent h-10 cursor-pointer"
             >
               <Trash2 size={18} />
               Delete
