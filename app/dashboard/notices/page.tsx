@@ -225,7 +225,7 @@ export default function NoticesPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
         <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">Notices</h1>
+          <h1 className="text-xl font-semibold text-foreground mb-2">Notices</h1>
           <p className="text-muted-foreground text-sm sm:text-base">Manage important announcements and system notices</p>
         </div>
         <Link href="/dashboard/notices/create">
@@ -240,7 +240,7 @@ export default function NoticesPage() {
         {/* Notices List - Left Column */}
         <Card className="lg:col-span-1 border-border overflow-hidden shadow-sm flex flex-col h-fit">
           <div className="p-4 sm:p-5 border-b border-border bg-secondary flex items-center justify-between">
-            <h2 className="font-bold text-foreground text-sm sm:text-base flex items-center gap-2">
+            <h2 className="font-semibold text-foreground text-sm sm:text-base flex items-center gap-2">
               <Info size={18} className="text-primary" />
               All Notices
             </h2>
@@ -273,7 +273,7 @@ export default function NoticesPage() {
                       <TableCell className="text-xs sm:text-sm font-medium text-foreground py-4">
                         <div className="flex flex-col gap-1">
                           <span className="truncate max-w-[150px]">{notice.title}</span>
-                          {notice.id === activeNoticeId && <span className="text-[10px] text-primary font-bold uppercase tracking-wider">Viewing</span>}
+                          {notice.id === activeNoticeId && <span className="text-[10px] text-primary font-semibold uppercase tracking-wider">Viewing</span>}
                         </div>
                       </TableCell>
                       <TableCell className="text-right py-4 pr-6">
@@ -340,7 +340,7 @@ export default function NoticesPage() {
                       System Announcement ID: #{activeNotice.id}
                     </div>
                   </div>
-                  <Badge className={`${activeNotice.is_active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'} text-xs sm:text-sm px-4 py-1.5 font-bold uppercase tracking-widest`}>
+                  <Badge className={`${activeNotice.is_active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'} text-xs sm:text-sm px-4 py-1.5 font-semibold uppercase tracking-widest`}>
                     {activeNotice.is_active ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
@@ -358,7 +358,7 @@ export default function NoticesPage() {
                 <Button
                   variant="outline"
                   onClick={() => handleOpenEdit(activeNotice)}
-                  className="flex-1 border-primary/20 text-primary hover:bg-primary/10 bg-transparent text-sm h-12 rounded-xl font-bold flex items-center gap-2 cursor-pointer transition-all hover:shadow-lg active:scale-[0.98]"
+                  className="flex-1 border-primary/20 text-primary hover:bg-primary/10 bg-transparent text-sm h-12 rounded-xl font-semibold flex items-center gap-2 cursor-pointer transition-all hover:shadow-lg active:scale-[0.98]"
                 >
                   <Edit size={18} />
                   Edit Notice
@@ -369,7 +369,7 @@ export default function NoticesPage() {
                     setNoticeToDelete(activeNotice)
                     setIsDeleteDialogOpen(true)
                   }}
-                  className="flex-1 border-destructive/20 text-destructive hover:bg-destructive/10 bg-transparent text-sm h-12 rounded-xl font-bold flex items-center gap-2 cursor-pointer transition-all hover:shadow-lg active:scale-[0.98]"
+                  className="flex-1 border-destructive/20 text-destructive hover:bg-destructive/10 bg-transparent text-sm h-12 rounded-xl font-semibold flex items-center gap-2 cursor-pointer transition-all hover:shadow-lg active:scale-[0.98]"
                 >
                   <Trash2 size={18} />
                   Delete Permanent
@@ -382,13 +382,13 @@ export default function NoticesPage() {
                 <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Info size={40} className="text-primary opacity-50" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground">No Notice Selected</h3>
+                <h3 className="text-lg font-semibold text-foreground">No Notice Selected</h3>
                 <p className="text-muted-foreground text-sm sm:text-base">
                   Select a notice from the left panel to view details, edit or manage its status.
                 </p>
                 <Button
                   onClick={() => router.push('/dashboard/notices/create')}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm h-11 px-8 rounded-xl font-bold mt-4 shadow-lg shadow-primary/20"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm h-11 px-8 rounded-xl font-semibold mt-4 shadow-lg shadow-primary/20"
                 >
                   Create New Announcement
                 </Button>
@@ -403,7 +403,7 @@ export default function NoticesPage() {
         <DialogContent className="max-w-2xl bg-background border-border shadow-2xl p-0 overflow-hidden">
           <div className="bg-primary/5 p-6 border-b border-border">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <DialogTitle className="text-xl font-semibold flex items-center gap-2">
                 <Edit className="text-primary" />
                 Update Notice
               </DialogTitle>
@@ -412,7 +412,7 @@ export default function NoticesPage() {
           <form onSubmit={handleUpdateNotice} className="p-6 space-y-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-title" className="text-foreground font-bold">Notice Title</Label>
+                <Label htmlFor="edit-title" className="text-foreground font-semibold">Notice Title</Label>
                 <Input
                   id="edit-title"
                   placeholder="The headline of your notice"
@@ -423,7 +423,7 @@ export default function NoticesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-desc" className="text-foreground font-bold">Content Description</Label>
+                <Label htmlFor="edit-desc" className="text-foreground font-semibold">Content Description</Label>
                 <Textarea
                   id="edit-desc"
                   placeholder="Describe the announcement in detail..."
@@ -439,14 +439,14 @@ export default function NoticesPage() {
                 type="button"
                 variant="outline"
                 onClick={() => setIsEditModalOpen(false)}
-                className="h-12 px-6 border-border font-bold rounded-xl cursor-pointer"
+                className="h-12 px-6 border-border font-semibold rounded-xl cursor-pointer"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isProcessing}
-                className="h-12 px-8 bg-primary text-primary-foreground hover:bg-primary/90 font-bold rounded-xl flex items-center gap-2 cursor-pointer shadow-lg shadow-primary/20"
+                className="h-12 px-8 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-xl flex items-center gap-2 cursor-pointer shadow-lg shadow-primary/20"
               >
                 {isProcessing ? <Loader2 className="animate-spin" /> : <Save size={20} />}
                 Update Notice
@@ -473,13 +473,13 @@ export default function NoticesPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-8 gap-3">
-            <AlertDialogCancel className="cursor-pointer border-border bg-muted/20 hover:bg-muted h-12 px-6 rounded-xl font-bold transition-all">
+            <AlertDialogCancel className="cursor-pointer border-border bg-muted/20 hover:bg-muted h-12 px-6 rounded-xl font-semibold transition-all">
               Discard Action
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteNotice}
               disabled={isProcessing}
-              className="cursor-pointer bg-destructive hover:bg-destructive/90 text-white border-0 h-12 px-8 rounded-xl font-bold shadow-lg shadow-destructive/20 transition-all active:scale-95"
+              className="cursor-pointer bg-destructive hover:bg-destructive/90 text-white border-0 h-12 px-8 rounded-xl font-semibold shadow-lg shadow-destructive/20 transition-all active:scale-95"
             >
               {isProcessing ? <Loader2 className="animate-spin" size={20} /> : 'Delete Permanent'}
             </AlertDialogAction>
@@ -499,14 +499,14 @@ export default function NoticesPage() {
               {alertConfig.type === 'success' ? <CheckCircle2 size={32} /> : <AlertCircle size={32} />}
               <AlertDialogTitle className="text-2xl font-black tracking-tight">{alertConfig.title}</AlertDialogTitle>
             </div>
-            <AlertDialogDescription className="text-foreground/80 text-base font-bold whitespace-pre-line leading-relaxed">
+            <AlertDialogDescription className="text-foreground/80 text-base font-semibold whitespace-pre-line leading-relaxed">
               {alertConfig.message}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-8">
             <AlertDialogAction
               onClick={() => setAlertConfig({ ...alertConfig, show: false })}
-              className={`cursor-pointer ${alertConfig.type === 'success' ? 'bg-primary hover:bg-primary/90 shadow-primary/20' : 'bg-destructive hover:bg-destructive/90 shadow-destructive/20'} text-white border-0 px-10 h-12 rounded-xl font-bold shadow-lg transition-all active:scale-95`}
+              className={`cursor-pointer ${alertConfig.type === 'success' ? 'bg-primary hover:bg-primary/90 shadow-primary/20' : 'bg-destructive hover:bg-destructive/90 shadow-destructive/20'} text-white border-0 px-10 h-12 rounded-xl font-semibold shadow-lg transition-all active:scale-95`}
             >
               Dismiss
             </AlertDialogAction>

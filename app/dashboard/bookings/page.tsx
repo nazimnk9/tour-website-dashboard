@@ -204,7 +204,7 @@ export default function BookingsPage() {
                   onClick={() => setCurrentPage(i + 1)}
                   className={`text-sm h-10 w-10 p-0 rounded-lg ${currentPage === i + 1
                     ? 'bg-primary text-primary-foreground'
-                    : 'border-border hover:bg-secondary'
+                    : 'border-border hover:bg-secondary hover:text-black/80'
                     }`}
                 >
                   {i + 1}

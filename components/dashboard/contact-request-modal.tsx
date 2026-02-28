@@ -150,7 +150,7 @@ export function ContactRequestModal({
                 onClick={onClose}
                 className="bg-primary hover:bg-primary/90 text-white font-bold px-10 h-11 rounded-lg shadow-sm transition-all active:scale-95"
               >
-                Close Inquiry
+                Close
               </Button>
             </div>
           </div>
