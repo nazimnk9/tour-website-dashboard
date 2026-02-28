@@ -95,11 +95,11 @@ export default function BookingsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
         <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">Bookings</h1>
+          <h1 className="text-xl font-semibold text-foreground mb-2">Bookings</h1>
           <p className="text-muted-foreground text-sm sm:text-base">Manage tour bookings and reservations</p>
         </div>
         <Link href="/dashboard/bookings/new">
-          <Button className="cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 whitespace-nowrap text-sm sm:text-base px-4 py-2 h-10 sm:h-11 rounded-lg">
+          <Button className="cursor-pointer text-black/80 hover:bg-primary/10 bg-transparent border border-1 flex items-center gap-2 whitespace-nowrap text-sm sm:text-base px-4 py-2 h-10 sm:h-11 rounded-lg">
             <Plus size={20} />
             Add New Booking
           </Button>

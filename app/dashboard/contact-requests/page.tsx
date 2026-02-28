@@ -124,7 +124,7 @@ export default function ContactRequestsPage() {
     <div className="space-y-6 sm:space-y-8 pb-8">
       {/* Page Header */}
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">Contact Requests</h1>
+        <h1 className="text-xl font-semibold text-foreground">Contact Requests</h1>
         <p className="text-muted-foreground text-sm sm:text-base">Manage customer inquiries and requests</p>
       </div>
 
