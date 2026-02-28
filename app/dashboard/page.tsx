@@ -52,7 +52,7 @@ function StatCard({ title, value, icon, bgColor, textColor, completedRate, showP
         </div>
       </div>
 
-      <h3 className="text-xs sm:text-sm font-semibold mb-1 opacity-90">{title}</h3>
+      <h3 className="text-xs sm:text-sm font-semibold mb-1">{title}</h3>
       <p className="text-lg sm:text-xl font-semibold mb-2">{value}</p>
 
       {showProgress && completedRate !== undefined && (
