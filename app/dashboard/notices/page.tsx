@@ -330,7 +330,7 @@ export default function NoticesPage() {
                 <div className="flex items-start sm:items-center justify-between gap-4 flex-col sm:flex-row">
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-3">
-                      <h2 className="text-xl sm:text-3xl font-extrabold text-foreground tracking-tight">{activeNotice.title}</h2>
+                      <h2 className="text-lg font-bold text-foreground tracking-tight">{activeNotice.title}</h2>
                       {activeNotice.is_active && (
                         <Badge className="bg-primary/10 text-primary border-primary/20 animate-pulse">LIVE NOW</Badge>
                       )}
