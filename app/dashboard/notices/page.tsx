@@ -300,7 +300,7 @@ export default function NoticesPage() {
                               handleOpenEdit(notice)
                             }}
                             variant="outline"
-                            className="cursor-pointer text-xs h-7 px-3 rounded border-border text-primary hover:bg-primary/10 bg-transparent flex items-center gap-1 shadow-sm font-semibold"
+                            className="cursor-pointer text-xs h-7 px-3 rounded border-border text-black/80 hover:bg-primary/10 bg-transparent hover:text-black/800 flex items-center gap-1 shadow-sm font-semibold"
                           >
                             <Edit size={14} />
                             Edit
@@ -358,7 +358,7 @@ export default function NoticesPage() {
                 <Button
                   variant="outline"
                   onClick={() => handleOpenEdit(activeNotice)}
-                  className="flex-1 border-primary/20 text-primary hover:bg-primary/10 bg-transparent text-sm h-12 rounded-xl font-semibold flex items-center gap-2 cursor-pointer transition-all hover:shadow-lg active:scale-[0.98]"
+                  className="flex-1 border-primary/20 text-black/80 hover:bg-primary/10 bg-transparent hover:text-black/80 text-sm h-12 rounded-xl font-semibold flex items-center gap-2 cursor-pointer transition-all hover:shadow-lg active:scale-[0.98]"
                 >
                   <Edit size={18} />
                   Edit Notice
@@ -369,7 +369,7 @@ export default function NoticesPage() {
                     setNoticeToDelete(activeNotice)
                     setIsDeleteDialogOpen(true)
                   }}
-                  className="flex-1 border-destructive/20 text-destructive hover:bg-destructive/10 bg-transparent text-sm h-12 rounded-xl font-semibold flex items-center gap-2 cursor-pointer transition-all hover:shadow-lg active:scale-[0.98]"
+                  className="flex-1 border-destructive/20 text-destructive hover:text-destructive hover:bg-destructive/10 bg-transparent text-sm h-12 rounded-xl font-semibold flex items-center gap-2 cursor-pointer transition-all hover:shadow-lg active:scale-[0.98]"
                 >
                   <Trash2 size={18} />
                   Delete Permanent
