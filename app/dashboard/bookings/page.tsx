@@ -153,7 +153,7 @@ export default function BookingsPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="border-border text-primary hover:bg-primary/10 bg-transparent text-xs h-8 px-2 rounded"
+                            className="border-border text-black/80 hover:bg-primary/10 bg-transparent hover:text-black/80 text-xs h-8 px-2 rounded"
                           >
                             <Eye size={14} />
                             <span className="hidden sm:inline ml-1">View</span>
@@ -162,7 +162,7 @@ export default function BookingsPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="border-border text-primary hover:bg-primary/10 bg-transparent text-xs h-8 px-2 rounded"
+                          className="border-border text-black/80 hover:bg-primary/10 bg-transparent hover:text-black/80 text-xs h-8 px-2 rounded"
                           onClick={() => {
                             setSelectedBookingId(booking.id)
                             setStatusModalOpen(true)
