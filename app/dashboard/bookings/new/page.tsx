@@ -37,6 +37,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 // Refined DatePicker component to show real calendar
 const DatePicker = ({ isOpen, onClose, availableDates, onDateSelect }: any) => {
@@ -111,6 +120,8 @@ export default function NewBookingPage() {
     const [travelerDetails, setTravelerDetails] = useState<{ name: string; email?: string }[]>([])
     const [step, setStep] = useState(1) // 1: Selection, 2: Details
     const [isGridDatePickerOpen, setIsGridDatePickerOpen] = useState(false)
+    const [errorDialogOpen, setErrorDialogOpen] = useState(false)
+    const [apiErrors, setApiErrors] = useState<any>(null)
     const gridDatePickerRef = useRef<HTMLDivElement>(null)
 
     // Fetch initial tour plans
@@ -227,12 +238,34 @@ export default function NewBookingPage() {
             await createBooking(payload, token || undefined)
             localStorage.removeItem('bookNowData')
             router.push('/dashboard/bookings')
-        } catch (err) {
+        } catch (err: any) {
             console.error('Submit error:', err)
-            alert('Failed to create booking')
+            setApiErrors(err)
+            setErrorDialogOpen(true)
         } finally {
             setSubmitting(false)
         }
+    }
+
+    // Recursive component to render nested error messages
+    const renderErrorMessages = (errors: any) => {
+        if (!errors) return []
+
+        return Object.entries(errors).flatMap(([key, value]): any => {
+            if (Array.isArray(value)) {
+                return value.map((msg, idx) => (
+                    <div key={`${key}-${idx}`} className="flex items-start gap-2 mb-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0" />
+                        <p className="text-sm font-medium text-destructive">
+                            <span className="capitalize">{key.replace(/_/g, ' ')}:</span> {msg}
+                        </p>
+                    </div>
+                ))
+            } else if (typeof value === 'object' && value !== null) {
+                return renderErrorMessages(value)
+            }
+            return null
+        }).filter(Boolean)
     }
 
     // Next 14 days logic
@@ -535,20 +568,20 @@ export default function NewBookingPage() {
                                         ))}
                                     </div>
 
-                                    <div className="mt-16 flex flex-col md:flex-row gap-6">
+                                    <div className="mt-16 flex flex-col md:flex-col gap-6">
                                         <Button
                                             variant="outline"
                                             onClick={() => setStep(1)}
-                                            className="h-16 flex-1 rounded-2xl border-2 font-black text-lg transition-all hover:scale-[0.98] active:scale-95 cursor-pointer"
+                                            className="h-16 flex-1 rounded-2xl border-2 font-black text-sm md:text-lg transition-all hover:scale-[0.98] active:scale-95 cursor-pointer w-full md:w-auto"
                                         >
                                             Review Selection
                                         </Button>
                                         <Button
                                             onClick={handleFinalSubmit}
                                             disabled={submitting || travelerDetails.some(t => !t.name)}
-                                            className="h-16 flex-1 rounded-2xl bg-primary text-white font-black text-lg shadow-xl shadow-primary/30 hover:shadow-2xl hover:bg-primary/90 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                                            className="h-16 flex-1 rounded-2xl bg-primary text-white font-black text-sm md:text-lg shadow-xl shadow-primary/30 hover:shadow-2xl hover:bg-primary/90 transition-all hover:scale-105 active:scale-95 cursor-pointer w-full md:w-auto"
                                         >
-                                            {submitting ? <Loader2 className="animate-spin" /> : <Check size={24} className="mr-2" />}
+                                            {submitting ? <Loader2 className="animate-spin" /> : <Check size={24} className="" />}
                                             Generate Booking & Notify
                                         </Button>
                                     </div>
@@ -648,6 +681,41 @@ export default function NewBookingPage() {
                     </div>
                 </div>
             </div>
+
+            <AlertDialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+                <AlertDialogContent className="bg-white rounded-[2rem] border-0 shadow-2xl p-8 max-w-md">
+                    <AlertDialogHeader className="mb-6">
+                        <div className="w-16 h-16 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mb-4 mx-auto sm:mx-0">
+                            <AlertCircle size={32} />
+                        </div>
+                        <AlertDialogTitle className="text-2xl font-black text-foreground tracking-tight">
+                            Booking Conflict
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-muted-foreground font-medium text-base">
+                            The system encountered validation errors while processing your reservation.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    <div className="bg-secondary/20 rounded-2xl p-6 mb-8 max-h-[300px] overflow-y-auto border border-border/30">
+                        {apiErrors ? (
+                            <div className="space-y-1">
+                                {renderErrorMessages(apiErrors)}
+                            </div>
+                        ) : (
+                            <p className="text-sm font-bold text-destructive">An unexpected error occurred. Please try again.</p>
+                        )}
+                    </div>
+
+                    <AlertDialogFooter>
+                        <AlertDialogAction
+                            onClick={() => setErrorDialogOpen(false)}
+                            className="h-14 w-full rounded-xl bg-foreground text-white font-black text-lg transition-all hover:scale-[1.02] active:scale-95 shadow-xl cursor-pointer"
+                        >
+                            Acknowledge & Edit
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }
