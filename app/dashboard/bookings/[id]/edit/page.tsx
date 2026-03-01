@@ -194,10 +194,33 @@ export default function EditBookingPage() {
     const handleTourChange = (id: string) => {
         const tour = tourPlans.find(t => t.id.toString() === id)
         setSelectedTour(tour || null)
-        setCounts({ adults: 1, children: 0, infants: 0, youths: 0, students: 0 })
-        setSelectedDate(null)
-        setTimeSlots([])
-        setSelectedTimeSlot(null)
+
+        // Check if this tour is already in the original booking
+        const existingItem = originalBooking?.items.find(item => item.tour_plan.toString() === id)
+
+        if (existingItem) {
+            setCounts({
+                adults: existingItem.num_adults,
+                children: existingItem.num_children,
+                infants: existingItem.num_infants,
+                youths: existingItem.num_youth,
+                students: existingItem.num_student_eu
+            })
+            if (typeof existingItem.time_slot === 'object') {
+                const ts = existingItem.time_slot as TourTime
+                setSelectedDate(ts.tour_date)
+                setSelectedTimeSlot(ts)
+            } else {
+                setSelectedDate(null)
+                setSelectedTimeSlot(null)
+                setTimeSlots([])
+            }
+        } else {
+            setCounts({ adults: 1, children: 0, infants: 0, youths: 0, students: 0 })
+            setSelectedDate(null)
+            setTimeSlots([])
+            setSelectedTimeSlot(null)
+        }
         setError(null)
     }
 
@@ -251,8 +274,10 @@ export default function EditBookingPage() {
             setSubmitting(true)
 
             // 1. Update Group Composition (Items)
-            if (originalBooking.items.length > 0) {
-                const itemId = originalBooking.items[0].id.toString()
+            const itemToUpdate = originalBooking.items.find(item => item.tour_plan === selectedTour?.id) || originalBooking.items[0];
+
+            if (itemToUpdate) {
+                const itemId = itemToUpdate.id.toString()
                 const itemPayload = {
                     num_adults: counts.adults,
                     num_children: counts.children,
@@ -266,21 +291,14 @@ export default function EditBookingPage() {
             // 2. Update Booking (Date, Time, Traveler Manifest)
             const bookingPayload = {
                 traveler_details: travelerDetails,
-                // We also need to send items with updated time_slot if it changed
-                // According to instructions, Date and Time updates go here.
             }
 
-            // If time slot changed, we need to include it in the items array for the booking patch
-            // This is tricky based on user's instruction "patch data in patch api ... /tour/booking/${id}"
-            // usually you'd send the items array with updated time_slot.
-
             // Re-constructing the items array for the booking patch
-            const updatedItems = originalBooking.items.map((item, idx) => {
-                if (idx === 0 && selectedTimeSlot) {
+            const updatedItems = originalBooking.items.map((item) => {
+                if (item.tour_plan === selectedTour?.id && selectedTimeSlot) {
                     return {
                         ...item,
                         time_slot: selectedTimeSlot.id,
-                        // Include counts too just in case
                         num_adults: counts.adults,
                         num_children: counts.children,
                         num_infants: counts.infants,
@@ -585,18 +603,18 @@ export default function EditBookingPage() {
                                         ))}
                                     </div>
 
-                                    <div className="mt-16 flex flex-col md:flex-row gap-6">
+                                    <div className="mt-16 flex flex-col md:flex-col gap-6">
                                         <Button
                                             variant="outline"
                                             onClick={() => setStep(1)}
-                                            className="h-16 flex-1 rounded-2xl border-2 font-black text-lg transition-all hover:scale-[0.98] active:scale-95 cursor-pointer"
+                                            className="h-16 flex-1 rounded-2xl border-2 font-black text-sm md:text-lg transition-all hover:scale-[0.98] active:scale-95 cursor-pointer"
                                         >
                                             Review Selection
                                         </Button>
                                         <Button
                                             onClick={handleFinalUpdate}
                                             disabled={submitting || travelerDetails.some(t => !t.name)}
-                                            className="h-16 flex-1 rounded-2xl bg-primary text-white font-black text-lg shadow-xl shadow-primary/30 hover:shadow-2xl hover:bg-primary/90 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                                            className="h-16 flex-1 rounded-2xl bg-primary text-white font-black text-sm md:text-lg shadow-xl shadow-primary/30 hover:shadow-2xl hover:bg-primary/90 transition-all hover:scale-105 active:scale-95 cursor-pointer"
                                         >
                                             {submitting ? <Loader2 className="animate-spin" /> : <Check size={24} className="mr-2" />}
                                             Update Booking
@@ -637,48 +655,55 @@ export default function EditBookingPage() {
                                     <div className="h-px bg-secondary w-full" />
                                     <div className="space-y-4">
                                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block mb-4">Itemized Breakdown</span>
-                                        {[
-                                            { label: 'Adults', count: counts.adults, price: selectedTour?.price_adult },
-                                            { label: 'Children', count: counts.children, price: selectedTour?.price_child },
-                                            { label: 'Infants', count: counts.infants, price: selectedTour?.price_infant },
-                                            { label: 'Youths', count: counts.youths, price: selectedTour?.price_youth },
-                                            { label: 'Students', count: counts.students, price: selectedTour?.price_student_eu }
-                                        ].map((item, i) => (
-                                            item.count > 0 && (
-                                                <div key={i} className="flex justify-between items-center">
-                                                    <span className="text-sm font-bold">{item.count} × {item.label}</span>
-                                                    <span className="font-black">€{(item.count * parseFloat(item.price || '0')).toFixed(2)}</span>
+                                        {originalBooking?.items.map((item, idx) => {
+                                            const tour = tourPlans.find(t => t.id === item.tour_plan)
+                                            return (
+                                                <div key={idx} className="p-4 rounded-2xl bg-secondary/20 border border-border/30 space-y-2">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-sm font-bold text-primary">{tour?.title || 'Unknown Tour'}</span>
+                                                        <span className="font-black">€{parseFloat(item.item_price).toFixed(2)}</span>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                                        {item.num_adults > 0 && <span>{item.num_adults} Adults</span>}
+                                                        {item.num_children > 0 && <span>{item.num_children} Children</span>}
+                                                        {item.num_infants > 0 && <span>{item.num_infants} Infants</span>}
+                                                        {item.num_youth > 0 && <span>{item.num_youth} Youth</span>}
+                                                        {item.num_student_eu > 0 && <span>{item.num_student_eu} Students</span>}
+                                                    </div>
+                                                    {typeof item.time_slot === 'object' && (
+                                                        <div className="flex items-center gap-2 text-[10px] font-black text-primary/70">
+                                                            <CalendarIcon size={10} />
+                                                            {new Date((item.time_slot as TourTime).tour_date.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                                                            <span className="mx-1">•</span>
+                                                            <Clock size={10} />
+                                                            {(item.time_slot as TourTime).start_time.split(':').slice(0, 2).join(':')}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )
-                                        ))}
+                                        })}
                                     </div>
-                                </div>
 
-                                <div className="relative p-6 pt-10 mt-10 rounded-[2rem] bg-secondary/30 overflow-hidden group">
-                                    <div className="absolute top-0 left-0 w-2 h-full bg-primary" />
-                                    <div className="flex flex-col items-end relative z-10">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-1">Total Price</span>
-                                        <span className="text-4xl font-black text-foreground tabular-nums tracking-tighter">
-                                            €{(
-                                                counts.adults * parseFloat(selectedTour?.price_adult || '0') +
-                                                counts.children * parseFloat(selectedTour?.price_child || '0') +
-                                                counts.infants * parseFloat(selectedTour?.price_infant || '0') +
-                                                counts.youths * parseFloat(selectedTour?.price_youth || '0') +
-                                                counts.students * parseFloat(selectedTour?.price_student_eu || '0')
-                                            ).toFixed(2)}
-                                        </span>
+                                    <div className="relative p-6 pt-10 mt-10 rounded-[2rem] bg-secondary/30 overflow-hidden group">
+                                        <div className="absolute top-0 left-0 w-2 h-full bg-primary" />
+                                        <div className="flex flex-col items-end relative z-10">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-1">Total Price</span>
+                                            <span className="text-4xl font-black text-foreground tabular-nums tracking-tighter">
+                                                €{parseFloat(originalBooking?.total_price || '0').toFixed(2)}
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
 
-                                {step === 1 && (
-                                    <Button
-                                        disabled={!selectedTimeSlot}
-                                        onClick={handleContinue}
-                                        className="w-full h-16 rounded-[1.5rem] bg-foreground text-white font-black text-lg transition-all hover:scale-[1.02] active:scale-95 shadow-xl disabled:opacity-50 cursor-pointer"
-                                    >
-                                        Update Details
-                                    </Button>
-                                )}
+                                    {step === 1 && (
+                                        <Button
+                                            disabled={!selectedTimeSlot}
+                                            onClick={handleContinue}
+                                            className="w-full h-16 rounded-[1.5rem] bg-foreground text-white font-black text-lg transition-all hover:scale-[1.02] active:scale-95 shadow-xl disabled:opacity-50 cursor-pointer"
+                                        >
+                                            Update Details
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
                         </Card>
                     </div>
