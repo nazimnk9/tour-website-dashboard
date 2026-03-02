@@ -161,7 +161,7 @@ export default function BookingDetailsPage() {
                         </div>
                       )}
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8">
                         {/* Column 1: Booking Info */}
                         <div className="space-y-6">
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -289,7 +289,7 @@ export default function BookingDetailsPage() {
 
                       {/* Highlights & Inclusions */}
                       {tourPlan && (
-                        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-dashed border-border">
+                        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-8 pt-8 border-t border-dashed border-border">
                           <div>
                             <h4 className="font-bold text-foreground mb-4 flex items-center gap-2">
                               <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
@@ -366,7 +366,7 @@ export default function BookingDetailsPage() {
 
                       {/* Know Before You Go & Not Allowed */}
                       {tourPlan && (
-                        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-dashed border-border text-sm">
+                        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-8 pt-8 border-t border-dashed border-border text-sm">
                           {tourPlan.know_before_you_go.length > 0 && (
                             <div className="p-4 bg-primary/5 rounded-lg border border-primary/10 col-span-2">
                               <p className="font-bold text-primary mb-2">Know Before You Go</p>
@@ -403,7 +403,7 @@ export default function BookingDetailsPage() {
           {/* Traveler Details */}
           <Card className="p-6 border-border shadow-sm">
             <h2 className="text-lg font-semibold text-foreground mb-6">Traveler Details</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {booking.traveler_details.map((traveler, index) => (
                 <div key={index} className="p-4 bg-secondary/30 rounded-lg border border-border flex items-start gap-3">
                   <div className="p-2 bg-background rounded-full text-muted-foreground">
