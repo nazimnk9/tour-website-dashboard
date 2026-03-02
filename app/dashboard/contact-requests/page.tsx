@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -12,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Eye, Loader2, AlertCircle } from 'lucide-react'
+import { Eye, Loader2, AlertCircle, Search, RotateCcw } from 'lucide-react'
 import { StatusModal } from '@/components/dashboard/status-modal'
 import { ContactRequestModal } from '@/components/dashboard/contact-request-modal'
 import { getContactRequests, ContactRequest } from '@/app/lib/api'
@@ -41,12 +42,14 @@ export default function ContactRequestsPage() {
   const [statusModalOpen, setStatusModalOpen] = useState(false)
   const [detailsModalOpen, setDetailsModalOpen] = useState(false)
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
 
-  const fetchRequests = async () => {
+  const fetchRequests = async (searchQuery?: string) => {
     if (!token) return
     try {
       setLoading(true)
-      const data = await getContactRequests(token)
+      const data = await getContactRequests(token, searchQuery)
       const mapped = data.results.map((r: any) => ({
         id: String(r.id),
         name: `${r.first_name} ${r.last_name}`,
@@ -69,8 +72,20 @@ export default function ContactRequestsPage() {
   }
 
   useEffect(() => {
-    fetchRequests()
-  }, [token])
+    fetchRequests(search)
+  }, [token, search])
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    setSearch(searchInput)
+    setCurrentPage(1)
+  }
+
+  const handleReset = () => {
+    setSearchInput('')
+    setSearch('')
+    setCurrentPage(1)
+  }
 
   const totalPages = Math.ceil(requests.length / ITEMS_PER_PAGE)
   const paginatedRequests = requests.slice(
@@ -123,9 +138,35 @@ export default function ContactRequestsPage() {
   return (
     <div className="space-y-6 sm:space-y-8 pb-8">
       {/* Page Header */}
-      <div className="flex flex-col gap-2">
-        <h1 className="text-xl font-semibold text-foreground">Contact Requests</h1>
-        <p className="text-muted-foreground text-sm sm:text-base">Manage customer inquiries and requests</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-xl font-semibold text-foreground">Contact Requests</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Manage customer inquiries and requests</p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleReset}
+            className="flex items-center gap-2"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Reset
+          </Button>
+
+          <form onSubmit={handleSearch} className="flex items-center gap-2">
+            <div className="relative">
+              <Input
+                placeholder="Search..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="w-[200px] sm:w-[300px] pl-9"
+              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            </div>
+            <Button type="submit">Search</Button>
+          </form>
+        </div>
       </div>
 
       {/* Requests Table - Responsive */}

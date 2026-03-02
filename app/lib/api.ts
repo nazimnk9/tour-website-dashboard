@@ -727,10 +727,16 @@ export const getBookings = async (
 /**
  * Get contact requests
  * @param token Authentication token
+ * @param search Optional search query
  * @returns Contact requests response
  */
-export const getContactRequests = async (token: string): Promise<ContactRequestResponse> => {
-    const response = await fetch(`${API_BASE_URL}/tour/contacts/`, {
+export const getContactRequests = async (token: string, search?: string): Promise<ContactRequestResponse> => {
+    let url = `${API_BASE_URL}/tour/contacts/`;
+    if (search) {
+        url += `?search=${encodeURIComponent(search)}`;
+    }
+
+    const response = await fetch(url, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
