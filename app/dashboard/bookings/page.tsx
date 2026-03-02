@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -13,10 +13,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Eye, Plus, Loader2, AlertCircle } from 'lucide-react'
+import { Eye, Plus, Loader2, AlertCircle, Search, RotateCcw } from 'lucide-react'
 import { StatusModal } from '@/components/dashboard/status-modal'
 import { getBookings, Booking } from '@/app/lib/api'
 import { useAuth } from '@/app/contexts/auth-context'
+import { Input } from '@/components/ui/input'
 
 const ITEMS_PER_PAGE = 20
 
@@ -29,12 +30,18 @@ export default function BookingsPage() {
   const [totalCount, setTotalCount] = useState(0)
   const [statusModalOpen, setStatusModalOpen] = useState(false)
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null)
+  const [searchValue, setSearchValue] = useState('')
+  const [search, setSearch] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [activeDateFrom, setActiveDateFrom] = useState('')
+  const [activeDateTo, setActiveDateTo] = useState('')
 
-  const fetchBookings = async (page: number) => {
+  const fetchBookings = async (page: number, searchTerm: string = '', from?: string, to?: string) => {
     if (!token) return
     try {
       setLoading(true)
-      const response = await getBookings(token, page)
+      const response = await getBookings(token, page, searchTerm, from, to)
       setBookings(response.results)
       setTotalCount(response.count)
       setError(null)
@@ -47,8 +54,41 @@ export default function BookingsPage() {
   }
 
   useEffect(() => {
-    fetchBookings(currentPage)
-  }, [token, currentPage])
+    fetchBookings(currentPage, search, activeDateFrom, activeDateTo)
+  }, [token, currentPage, search, activeDateFrom, activeDateTo])
+
+  const handleDateSearch = () => {
+    setCurrentPage(1)
+    setSearch('')
+    setSearchValue('')
+    setActiveDateFrom(dateFrom)
+    setActiveDateTo(dateTo)
+  }
+
+  const handleTextSearch = () => {
+    setCurrentPage(1)
+    setSearch(searchValue)
+    setDateFrom('')
+    setDateTo('')
+    setActiveDateFrom('')
+    setActiveDateTo('')
+  }
+
+  const handleReset = () => {
+    setCurrentPage(1)
+    setSearchValue('')
+    setSearch('')
+    setDateFrom('')
+    setDateTo('')
+    setActiveDateFrom('')
+    setActiveDateTo('')
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleTextSearch()
+    }
+  }
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 
@@ -69,7 +109,7 @@ export default function BookingsPage() {
   }
 
   const handleStatusChange = () => {
-    fetchBookings(currentPage)
+    fetchBookings(currentPage, search, activeDateFrom, activeDateTo)
   }
 
   if (loading) {
@@ -98,12 +138,67 @@ export default function BookingsPage() {
           <h1 className="text-xl font-semibold text-foreground mb-2">Bookings</h1>
           <p className="text-muted-foreground text-sm sm:text-base">Manage tour bookings and reservations</p>
         </div>
-        <Link href="/dashboard/bookings/new">
-          <Button className="cursor-pointer text-black/80 hover:bg-primary/10 bg-transparent border border-1 flex items-center gap-2 whitespace-nowrap text-sm sm:text-base px-4 py-2 h-10 sm:h-11 rounded-lg">
-            <Plus size={20} />
-            Add New Booking
+
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            onClick={handleReset}
+            className="h-10 px-3 border-border text-muted-foreground hover:text-foreground flex items-center gap-2"
+            title="Reset Filters"
+          >
+            <RotateCcw size={16} />
+            Reset
           </Button>
-        </Link>
+
+          <div className="flex items-center gap-2">
+            <Input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="h-10 border-border w-full sm:w-40"
+              title="From Date"
+            />
+            <Input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="h-10 border-border w-full sm:w-40"
+              title="To Date"
+            />
+          </div>
+
+          <Button
+            onClick={handleDateSearch}
+            className="h-10 px-4 bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            Search
+          </Button>
+
+          <div className="relative flex-1 sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Search bookings..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="pl-9 h-10 border-border"
+            />
+          </div>
+
+          <Button
+            onClick={handleTextSearch}
+            className="h-10 px-4 bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            Search
+          </Button>
+
+          <Link href="/dashboard/bookings/new">
+            <Button className="cursor-pointer text-black/80 hover:bg-primary/10 bg-transparent border border-1 flex items-center gap-2 whitespace-nowrap text-sm sm:text-base px-4 py-2 h-10 sm:h-11 rounded-lg">
+              <Plus size={20} />
+              Add New Booking
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Bookings Table - Responsive */}

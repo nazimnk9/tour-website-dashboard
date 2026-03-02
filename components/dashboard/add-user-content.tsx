@@ -18,6 +18,13 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 import Link from 'next/link'
 
 export function AddUserContent() {
@@ -30,7 +37,7 @@ export function AddUserContent() {
         email: '',
         phone: '',
         password: '',
-        role: 'ADMIN',
+        role: '',
     })
 
     const [alertConfig, setAlertConfig] = useState<{
@@ -181,6 +188,22 @@ export function AddUserContent() {
                             onChange={handleChange}
                             required
                         />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="role">Role</Label>
+                        <Select
+                            value={formData.role}
+                            onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}
+                        >
+                            <SelectTrigger id="role" className="w-full">
+                                <SelectValue placeholder="Select a role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ADMIN">Admin</SelectItem>
+                                <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <div className="pt-4 flex gap-4">

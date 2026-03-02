@@ -687,10 +687,24 @@ export const deleteNotice = async (token: string, id: string): Promise<void> => 
  * @param page Optional page number for pagination
  * @returns Bookings response
  */
-export const getBookings = async (token: string, page?: number): Promise<BookingResponse> => {
+export const getBookings = async (
+    token: string,
+    page?: number,
+    search?: string,
+    created_at_from?: string,
+    created_at_to?: string
+): Promise<BookingResponse> => {
     let url = `${API_BASE_URL}/tour/booking/`;
-    if (page) {
-        url += `?page=${page}`;
+    const params = new URLSearchParams();
+
+    if (page) params.append('page', page.toString());
+    if (search) params.append('search', search);
+    if (created_at_from) params.append('created_at_from', created_at_from);
+    if (created_at_to) params.append('created_at_to', created_at_to);
+
+    const queryString = params.toString();
+    if (queryString) {
+        url += `?${queryString}`;
     }
 
     const response = await fetch(url, {

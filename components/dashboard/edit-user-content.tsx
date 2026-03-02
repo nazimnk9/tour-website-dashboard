@@ -18,6 +18,13 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 import Link from 'next/link'
 
 export function EditUserContent({ id }: { id: string }) {
@@ -32,6 +39,7 @@ export function EditUserContent({ id }: { id: string }) {
         email: '',
         phone: '',
         password: '',
+        role: '',
     })
 
     const [alertConfig, setAlertConfig] = useState<{
@@ -59,6 +67,7 @@ export function EditUserContent({ id }: { id: string }) {
                     email: user.email,
                     phone: user.phone || '',
                     password: '', // Password usually shouldn't be populated for security
+                    role: user.role,
                 })
             } catch (error) {
                 console.error('Error fetching user detail:', error)
@@ -88,6 +97,7 @@ export function EditUserContent({ id }: { id: string }) {
             if (formData.email !== initialData.email) patchData.email = formData.email
             if (formData.phone !== (initialData.phone || '')) patchData.phone = formData.phone
             if (formData.password) patchData.password = formData.password
+            if (formData.role !== initialData.role) patchData.role = formData.role
 
             if (Object.keys(patchData).length === 0) {
                 setUpdating(false)
@@ -226,6 +236,22 @@ export function EditUserContent({ id }: { id: string }) {
                             value={formData.password}
                             onChange={handleChange}
                         />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="role">Role</Label>
+                        <Select
+                            value={formData.role}
+                            onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}
+                        >
+                            <SelectTrigger id="role" className="w-full">
+                                <SelectValue placeholder="Select a role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ADMIN">Admin</SelectItem>
+                                <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <div className="pt-4 flex gap-4">
