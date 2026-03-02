@@ -147,7 +147,7 @@ export interface BookingItem {
     item_price: string;
     created_at: string;
     booking: number;
-    tour_plan: number;
+    tour_plan: number | TourPlan;
     time_slot: number | TourTime;
 }
 
