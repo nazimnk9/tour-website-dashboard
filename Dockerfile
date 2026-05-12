@@ -6,8 +6,10 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm install --legacy-peer-deps
 
+# Add --ignore-scripts=false to ensure native binaries
+# are built/downloaded for linux-musl (Alpine)
+RUN npm ci --legacy-peer-deps
 
 # ─────────────────────────────────────────────
 #  Stage 2 – build
@@ -19,8 +21,11 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-RUN npm run build
+# ⚠️ Do NOT let "COPY . ." overwrite node_modules with a host copy.
+# The line below ensures host node_modules (if present) are ignored.
+# Add "node_modules" to your .dockerignore file instead (see below).
 
+RUN npm run build
 
 # ─────────────────────────────────────────────
 #  Stage 3 – runtime
@@ -35,12 +40,11 @@ ENV PORT=5000
 RUN addgroup --system nextjs && adduser --system --ingroup nextjs nextjs
 
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
 USER nextjs
 
 EXPOSE 5000
 
-CMD ["npm", "run", "start"]
+CMD ["node", "server.js"]
