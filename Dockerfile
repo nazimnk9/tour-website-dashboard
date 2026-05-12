@@ -1,7 +1,7 @@
 # ─────────────────────────────────────────────
 #  Stage 1 – install dependencies
 # ─────────────────────────────────────────────
-FROM node:20-slim AS deps          # <-- slim uses glibc, not musl
+FROM node:20-slim AS deps
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ RUN npm ci --legacy-peer-deps
 # ─────────────────────────────────────────────
 #  Stage 2 – build
 # ─────────────────────────────────────────────
-FROM node:20-slim AS builder       # <-- same here
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ RUN npm run build
 # ─────────────────────────────────────────────
 #  Stage 3 – runtime
 # ─────────────────────────────────────────────
-FROM node:20-slim AS runner        # <-- and here
+FROM node:20-slim AS runner
 
 WORKDIR /app
 
