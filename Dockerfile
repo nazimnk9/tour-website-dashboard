@@ -5,8 +5,10 @@ FROM node:20-slim AS deps
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm ci --legacy-peer-deps
+COPY package.json ./
+
+# Don't copy package-lock.json — let npm generate a fresh one for Linux
+RUN npm install --legacy-peer-deps
 
 
 # ─────────────────────────────────────────────

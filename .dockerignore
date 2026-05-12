@@ -1,5 +1,5 @@
-# .dockerignore
 node_modules
 .next
+package-lock.json
 .env*.local
 npm-debug.log*
