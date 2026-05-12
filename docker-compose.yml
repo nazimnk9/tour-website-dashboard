@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: dawatsrls_frontend
+    container_name: tour_admin_frontend
     restart: unless-stopped
     env_file:
       - .env
